@@ -30,3 +30,7 @@ Thumbs.db
 
 # taste-skill inspector output
 .taste-skill/
+
+#tools
+.codegraph/
+.claude/

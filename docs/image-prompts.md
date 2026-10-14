@@ -8,7 +8,7 @@ archivo y la etiqueta que muestra el placeholder en la página.
 
 1. Genera la imagen con el prompt de su sección.
 2. Expórtala en **WebP** (o JPG) con el nombre exacto del id. Por ejemplo,
-   `hero-cielo-barrio.webp`.
+   `hero-bodeguero-fiado.webp`.
 3. Colócala en `public/images/`.
 4. Recarga la página: el componente `Picture.astro` detecta el archivo y
    reemplaza el placeholder sin tocar código.
@@ -32,26 +32,26 @@ familia visual:
 
 ---
 
-## 1. `hero-cielo-barrio` - Fondo del hero
+## 1. `hero-bodeguero-fiado` - Foto del hero
 
-- **Dónde va:** fondo de la tarjeta grande del hero, detrás del titular blanco
-  y de la ventana del producto.
-- **Formato:** 16:9 horizontal, mínimo 2560 × 1440 px.
-- **Importante:** la mitad superior y el centro deben ser **cielo amplio y
-  limpio**, porque ahí va el titular en blanco. Los techos y las casas van solo
-  en el tercio inferior.
+- **Dónde va:** columna izquierda del hero en desktop (a la derecha va el
+  titular). En móvil aparece debajo del texto, recortada a 4:3.
+- **Formato:** 4:5 vertical, mínimo 1600 × 2000 px. Deja a las dos personas y
+  el gesto de entrega en el centro del encuadre, porque en móvil se recorta
+  arriba y abajo.
 
 ```text
-A painterly oil-on-canvas illustration of a vast early-morning sky over the
-rooftops of a working-class neighborhood in Lima, Peru. The upper two-thirds of
-the frame is open sky: soft brushstrokes of muted blue, warm grey and pale gold
-clouds, visible canvas texture, calm and hopeful. In the lower third, a gentle
-silhouette of flat-roofed brick and concrete houses painted in faded pastel
-colors, a few water tanks, rebar on rooftops and a small corner shop (bodega)
-with its metal shutter half open and a warm light inside. Subtle deep forest
-green tones in the shadows. Style reminiscent of contemporary painted website
-heroes, loose brushwork, no people, no text, no logos. Wide cinematic
-composition, 16:9.
+Realistic documentary photograph inside a small neighborhood shop (bodega) in
+Lima, Peru, at mid-morning. Behind a worn wooden counter, a Peruvian bodega
+owner in his fifties, wearing a simple apron over a polo shirt, hands a plastic
+bag with bread and a carton of milk to a neighbor, a Peruvian woman in her
+forties standing on the customer side. With his other hand he holds a
+smartphone, as if noting the sale on credit. Both have calm, friendly, natural
+expressions of people who know each other, not posed stock smiles. Shelves of
+everyday groceries softly blurred behind them, warm natural light coming from
+the street entrance, deep green and amber color grade, 35mm lens, shallow depth
+of field, authentic and dignified. No readable text, no brand logos. Vertical
+4:5.
 ```
 
 ## 2. `menu-visual` - Panel izquierdo del menú a pantalla completa

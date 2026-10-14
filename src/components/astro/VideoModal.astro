@@ -1,0 +1,188 @@
+---
+/**
+ * Video de presentación a pantalla completa sobre un velo negro. Se abre con
+ * cualquier enlace que tenga data-video-open (el enlace sigue funcionando sin JS).
+ * Usa <dialog> nativo: Escape, foco atrapado y fondo inerte vienen gratis.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import Picture from './Picture.astro';
+
+interface Props {
+  title: string;
+  closeLabel: string;
+  soon: string;
+  posterAlt: string;
+}
+
+const { title, closeLabel, soon, posterAlt } = Astro.props;
+
+// Mismo archivo que usa la sección "Cómo funciona"
+const hasVideo = fs.existsSync(
+  path.join(process.cwd(), 'public', 'video', 'quina-presentacion.mp4'),
+);
+---
+
+<dialog class="video-modal" aria-label={title} data-video-modal>
+  <button type="button" class="video-close" aria-label={closeLabel} data-video-close>
+    <svg viewBox="0 0 24 24" class="size-7" aria-hidden="true">
+      <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" />
+    </svg>
+  </button>
+
+  <div class="video-box">
+    {hasVideo ? (
+      <video
+        class="video-player"
+        src="/video/quina-presentacion.mp4"
+        controls
+        playsinline
+        preload="none"
+        data-video-player
+      />
+    ) : (
+      <div class="video-soon">
+        <Picture id="video-poster" alt={posterAlt} tone="dark" />
+        <p class="video-soon-text">{soon}</p>
+      </div>
+    )}
+  </div>
+</dialog>
+
+<style>
+  .video-modal {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 4.5rem 1rem;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transition:
+      opacity 250ms var(--ease-out-expo),
+      overlay 250ms allow-discrete,
+      display 250ms allow-discrete;
+  }
+
+  .video-modal:not([open]) {
+    display: none;
+  }
+
+  .video-modal[open] {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .video-modal[open] {
+      opacity: 0;
+    }
+  }
+
+  .video-modal::backdrop {
+    background: rgb(0 0 0 / 0.95);
+  }
+
+  /* 16:9 tan grande como quepa en la pantalla, en vertical u horizontal */
+  .video-box {
+    position: relative;
+    width: min(100%, 72rem, (100dvh - 9rem) * 16 / 9);
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    scale: 1;
+    transition: scale 400ms var(--ease-out-expo);
+  }
+
+  @starting-style {
+    .video-modal[open] .video-box {
+      scale: 0.94;
+    }
+  }
+
+  .video-player {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .video-soon {
+    position: absolute;
+    inset: 0;
+  }
+
+  .video-soon-text {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 2rem 1.25rem 1.25rem;
+    background: linear-gradient(transparent, rgb(0 0 0 / 0.75));
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .video-close {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    color: #fff;
+    transition: background-color 150ms ease-out;
+  }
+
+  .video-close:hover,
+  .video-close:focus-visible {
+    background: rgb(255 255 255 / 0.14);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .video-modal,
+    .video-box {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { getLenis } from '@/utils/lenis';
+
+  const modal = document.querySelector<HTMLDialogElement>('[data-video-modal]');
+  const player = modal?.querySelector<HTMLVideoElement>('[data-video-player]');
+
+  if (modal) {
+    const close = () => modal.close();
+
+    document.querySelectorAll<HTMLAnchorElement>('[data-video-open]').forEach((trigger) => {
+      trigger.addEventListener('click', (e) => {
+        // Lenis escucha los clics en anclas desde window: sin esto, scrollea a #como-funciona
+        e.preventDefault();
+        e.stopPropagation();
+        modal.showModal();
+        getLenis()?.stop();
+        player?.play().catch(() => {});
+      });
+    });
+
+    modal.querySelector('[data-video-close]')?.addEventListener('click', close);
+
+    // Clic en el velo negro (fuera del video) cierra
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) close();
+    });
+
+    // Cubre Escape, el botón y el clic en el velo
+    modal.addEventListener('close', () => {
+      player?.pause();
+      getLenis()?.start();
+    });
+  }
+</script>

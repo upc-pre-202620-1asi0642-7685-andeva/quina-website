@@ -273,54 +273,9 @@ function initMagnetic() {
    --------------------------------------------------------------------------- */
 
 function initHero() {
+  // La ventana del producto y sus tarjetas tienen su propia secuencia en HeroShowcase.astro
   const fades = gsap.utils.toArray<HTMLElement>('[data-hero-fade]');
-  const windowEl = document.querySelector<HTMLElement>('[data-hero-window]');
-  const stage = document.querySelector<HTMLElement>('[data-hero-stage]');
-  const bgMedia = document.querySelector<HTMLElement>('[data-hero-bg-media]');
-  const floats = gsap.utils.toArray<HTMLElement>('[data-float]');
-
-  const intro = gsap.timeline({ defaults: { ease: 'expo.out' }, delay: 0.15 });
-  intro
-    .from(fades, { autoAlpha: 0, y: 24, duration: 1, stagger: 0.09 }, 0.55)
-    .from(windowEl, { y: 120, autoAlpha: 0, duration: 1.4 }, 0.7)
-    .from(
-      floats,
-      { y: 40, scale: 0.92, autoAlpha: 0, duration: 1.1, stagger: 0.12, ease: 'back.out(1.6)' },
-      1.15,
-    );
-
-  // La ventana se endereza y crece mientras entra (open-design + Evernote)
-  if (windowEl && stage) {
-    gsap.fromTo(
-      windowEl,
-      { rotateX: 14, scale: 0.9 },
-      {
-        rotateX: 0,
-        scale: 1,
-        ease: 'none',
-        scrollTrigger: { trigger: stage, start: 'top 85%', end: 'top 20%', scrub: true },
-      },
-    );
-  }
-
-  // Parallax de cada tarjeta con su propia velocidad
-  floats.forEach((card) => {
-    const speed = Number(card.dataset['speed'] ?? 0);
-    gsap.to(card, {
-      yPercent: speed * -600,
-      ease: 'none',
-      scrollTrigger: { trigger: stage, start: 'top bottom', end: 'bottom top', scrub: true },
-    });
-  });
-
-  if (bgMedia) {
-    gsap.to(bgMedia, {
-      yPercent: 12,
-      scale: 1.06,
-      ease: 'none',
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
-    });
-  }
+  gsap.from(fades, { autoAlpha: 0, y: 24, duration: 1, stagger: 0.09, ease: 'expo.out', delay: 0.7 });
 }
 
 /* ---------------------------------------------------------------------------

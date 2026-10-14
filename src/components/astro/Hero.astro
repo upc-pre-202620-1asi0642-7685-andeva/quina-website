@@ -1,10 +1,11 @@
 ---
 import Button from './Button.astro';
 import Picture from './Picture.astro';
-import AppWindow from './AppWindow.astro';
+import HeroShowcase from './HeroShowcase.astro';
+import VideoModal from './VideoModal.astro';
 import { site } from '@/data/site';
 import { home } from '@/i18n/home';
-import type { Lang } from '@/i18n/ui';
+import { appLinks, type Lang } from '@/i18n/ui';
 
 interface Props {
   lang?: Lang;
@@ -12,118 +13,55 @@ interface Props {
 
 const { lang = 'es' } = Astro.props;
 const c = home[lang].hero;
+const how = home[lang].how;
 ---
 
 <section class="hero" aria-labelledby="hero-title">
-  <div class="hero-bg" data-hero-bg>
-    <div class="hero-bg-media" data-hero-bg-media>
-      <Picture id="hero-cielo-barrio" alt={c.imageAlt} tone="dark" loading="eager" />
-    </div>
-    <div class="hero-scrim" aria-hidden="true"></div>
-  </div>
-
-  <div class="hero-copy">
-    <h1 id="hero-title" class="hero-title" data-split set:html={c.title} />
-    <p class="hero-lead" data-hero-fade>
-      {c.lead}
-    </p>
-    <div class="hero-actions" data-hero-fade>
-      <Button href={site.appSignupUrl} size="lg">
-        <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
-          <path
-            d="M12 5v14m-7-7h14"
-            stroke="currentColor"
-            stroke-width="2.25"
-            stroke-linecap="round"
-          />
-        </svg>
-        {c.primary}
-      </Button>
-      <Button href={c.secondaryHref} variant="light" size="lg">
-        {c.secondary}
-      </Button>
-    </div>
-    <p class="hero-note" data-hero-fade>
-      {c.note}
-    </p>
-  </div>
-
-  <div class="hero-stage" data-hero-stage>
-    <div class="hero-window" data-hero-window>
-      <AppWindow />
+  <div class="hero-split">
+    <div class="hero-media" data-hero-fade>
+      <Picture id="hero-bodeguero-fiado" alt={c.imageAlt} tone="green" loading="eager" />
     </div>
 
-    <!-- Tarjetas flotantes estilo Evernote: aparecen y se desplazan con el scroll -->
-    <div class="float float-sale" data-float data-speed="-0.12" data-ui aria-hidden="true">
-      <p class="float-kicker">{c.sale}</p>
-      <div class="float-row">
-        <span class="avatar">RQ</span>
-        <span class="grow">
-          <strong>Rosa Quispe</strong>
-          <small>Leche Gloria x6</small>
-        </span>
-        <strong class="num">S/ 24.60</strong>
-      </div>
-      <div class="float-ok">
-        <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
-          <path
-            d="m5 12 4.5 4.5L19 7"
-            stroke="currentColor"
-            stroke-width="2.5"
-            fill="none"
-            stroke-linecap="round"
-          />
-        </svg>
-        {c.saleOk}
-      </div>
-    </div>
-
-    <div class="float float-mail" data-float data-speed="0.1" data-ui aria-hidden="true">
-      <div class="float-row">
-        <span class="mail-icon">
-          <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
+    <div class="hero-copy">
+      <h1 id="hero-title" class="hero-title" data-split set:html={c.title} />
+      <p class="hero-lead" data-hero-fade>
+        {c.lead}
+      </p>
+      <div class="hero-actions" data-hero-fade>
+        <Button href={site.appSignupUrl} size="lg">
+          <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
             <path
-              d="M4 6h16v12H4zM4 7l8 6 8-6"
+              d="M12 5v14m-7-7h14"
               stroke="currentColor"
-              stroke-width="1.8"
-              fill="none"
-              stroke-linejoin="round"
+              stroke-width="2.25"
+              stroke-linecap="round"
             />
           </svg>
-        </span>
-        <span class="grow">
-          <strong>{c.mailTitle}</strong>
-          <small>{c.mailAgo}</small>
-        </span>
+          {c.primary}
+        </Button>
+        <Button
+          href={c.secondaryHref}
+          variant="light"
+          size="lg"
+          aria-haspopup="dialog"
+          data-video-open
+        >
+          <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
+            <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" fill="currentColor" />
+          </svg>
+          {c.secondary}
+        </Button>
       </div>
-      <p class="mail-body" set:html={c.mailBody} />
-    </div>
-
-    <div class="float float-street" data-float data-speed="-0.06" data-ui aria-hidden="true">
-      <p class="float-kicker">{c.street}</p>
-      <strong class="street-total">S/ 2,140.80</strong>
-      <div class="street-split">
-        <span style="flex: 7"></span>
-        <span style="flex: 2"></span>
-        <span style="flex: 1"></span>
-      </div>
-      <ul class="street-legend">
-        <li>
-          <i class="ok"></i>
-          {c.legend[0]}
-        </li>
-        <li>
-          <i class="warn"></i>
-          {c.legend[1]}
-        </li>
-        <li>
-          <i class="late"></i>
-          {c.legend[2]}
-        </li>
-      </ul>
+      <p class="hero-login" data-hero-fade>
+        {c.hasAccount} <a href={appLinks.login} class="hero-login-link">{c.login}</a>
+      </p>
     </div>
   </div>
+
+  <HeroShowcase lang={lang} />
 </section>
+
+<VideoModal title={c.videoTitle} closeLabel={c.videoClose} soon={c.videoSoon} posterAlt={how.posterAlt} />
 
 <style>
   .hero {
@@ -131,58 +69,85 @@ const c = home[lang].hero;
     padding: 0 0.75rem;
   }
 
-  .hero-bg {
-    position: absolute;
-    inset: 0 0.75rem auto;
-    height: min(100svh - 6rem, 940px);
-    min-height: 640px;
+  /*
+   * Tarjeta verde oscuro original del hero (con su velo más oscuro arriba) y la foto encajada dentro.
+   * Móvil: texto arriba y foto abajo. Desktop: foto a la izquierda, texto a la derecha.
+   */
+  .hero-split {
+    --inset: 0.75rem;
+    --card: #1b2a20;
+    display: grid;
+    gap: var(--inset);
+    padding: var(--inset);
     border-radius: 28px;
-    overflow: hidden;
-  }
-
-  .hero-bg-media {
-    position: absolute;
-    inset: -8% 0 0;
-    will-change: transform;
-  }
-
-  .hero-scrim {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgb(6 20 11 / 0.45) 0%, rgb(6 20 11 / 0) 60%);
-  }
-
-  .hero-copy {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 5rem 1.25rem 0;
-    text-align: center;
+    background: linear-gradient(180deg, #13201a 0%, var(--card) 60%);
     color: #fff;
   }
 
-  @media (min-width: 768px) {
-    .hero-copy {
-      padding-top: 7rem;
+  @media (min-width: 1024px) {
+    .hero-split {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      min-height: min(100svh - 6rem, 880px);
     }
   }
 
+  /* Radio concéntrico: el de la tarjeta menos el margen interior */
+  .hero-media {
+    position: relative;
+    order: 2;
+    aspect-ratio: 4 / 3;
+    border-radius: calc(28px - var(--inset));
+    overflow: hidden;
+  }
+
+  /* La foto llena la celda sin imponer su alto natural a la tarjeta */
+  .hero-media :global(.picture) {
+    position: absolute;
+    inset: 0;
+    object-position: 50% 40%;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-media {
+      order: 0;
+      aspect-ratio: auto;
+    }
+  }
+
+  .hero-copy {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0.75rem 2.25rem;
+    text-align: center;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-copy {
+      align-items: flex-start;
+      padding: 3rem clamp(2rem, 4vw, 5rem);
+      text-align: left;
+    }
+  }
+
+  /* El tamaño sale del ancho de la columna: «Quina cobra por ti.» siempre entra en una línea */
   .hero-title {
-    font-size: var(--text-display);
-    line-height: 0.95;
+    font-size: clamp(2.25rem, 12cqi, 5.5rem);
+    line-height: 0.98;
     letter-spacing: -0.045em;
     font-weight: 700;
-    max-width: 20ch;
     text-wrap: balance;
   }
 
   .hero-lead {
-    margin-top: 1.75rem;
-    max-width: 38rem;
+    margin-top: 1.5rem;
+    max-width: 30rem;
+    text-wrap: pretty;
     font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
     line-height: 1.5;
-    color: rgb(255 255 255 / 0.92);
+    color: rgb(255 255 255 / 0.8);
   }
 
   .hero-actions {
@@ -193,213 +158,31 @@ const c = home[lang].hero;
     margin-top: 2.25rem;
   }
 
-  .hero-note {
-    margin-top: 1rem;
+  @media (min-width: 1024px) {
+    .hero-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  .hero-login {
+    margin-top: 1.5rem;
     font-size: 0.9375rem;
     color: rgb(255 255 255 / 0.8);
   }
 
-  .hero-stage {
-    position: relative;
-    width: min(100%, 72rem);
-    margin: 4rem auto 0;
-    padding-inline: 0.5rem;
-    perspective: 1600px;
-  }
-
-  @media (min-width: 768px) {
-    .hero-stage {
-      padding-inline: 2rem;
-    }
-  }
-
-  .hero-window {
-    transform-origin: 50% 0%;
-    will-change: transform;
-  }
-
-  /* Tarjetas flotantes */
-  .float {
-    position: absolute;
-    z-index: 2;
-    width: 17.5rem;
-    padding: 1rem;
-    border-radius: 16px;
-    background: #fff;
-    color: #262626;
-    font-size: 13px;
-    box-shadow:
-      0 1px 2px rgb(10 46 23 / 0.08),
-      0 18px 40px -12px rgb(10 46 23 / 0.3);
-  }
-
-  .float-sale {
-    left: -1rem;
-    top: 34%;
-  }
-
-  .float-mail {
-    right: -1.5rem;
-    top: 8%;
-    width: 19rem;
-  }
-
-  .float-street {
-    right: 4%;
-    bottom: -2.5rem;
-    width: 15rem;
-  }
-
-  @media (max-width: 1023px) {
-    .float-sale,
-    .float-street {
-      display: none;
-    }
-    .float-mail {
-      right: 1rem;
-      top: auto;
-      bottom: -2rem;
-      width: min(19rem, 80%);
-    }
-  }
-
-  .float-kicker {
-    color: #5f6862;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .float-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .float-row:first-child {
-    margin-top: 0;
-  }
-
-  .grow {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .grow strong,
-  .grow small {
-    display: block;
-  }
-
-  .grow small {
-    color: #5f6862;
-    font-size: 12px;
-  }
-
-  .num {
-    font-variant-numeric: tabular-nums;
-  }
-
-  .avatar {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--color-accent-soft);
-    color: #7a4a00;
-    font-weight: 700;
-    font-size: 12px;
-  }
-
-  .float-ok {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 12px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
-    font-weight: 600;
-    font-size: 12px;
-  }
-
-  .mail-icon {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: var(--color-primary-dark);
+  /* Mismo subrayado que crece de los enlaces del footer, en verde Quina */
+  .hero-login-link {
     color: var(--color-primary);
+    font-weight: 600;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 350ms var(--ease-out-expo);
   }
 
-  .mail-body {
-    margin-top: 10px;
-    line-height: 1.5;
-    color: #4f5a52;
-  }
-
-  .mail-body strong {
-    color: #262626;
-  }
-
-  .street-total {
-    display: block;
-    margin-top: 4px;
-    font-size: 24px;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .street-split {
-    display: flex;
-    gap: 3px;
-    height: 8px;
-    margin-top: 12px;
-  }
-
-  .street-split span {
-    border-radius: 3px;
-  }
-
-  .street-split span:nth-child(1) {
-    background: var(--color-success);
-  }
-  .street-split span:nth-child(2) {
-    background: var(--color-warning);
-  }
-  .street-split span:nth-child(3) {
-    background: var(--color-error);
-  }
-
-  .street-legend {
-    display: flex;
-    gap: 12px;
-    margin-top: 10px;
-    color: #6b746d;
-    font-size: 11px;
-  }
-
-  .street-legend li {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .street-legend i {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-  }
-
-  .street-legend .ok {
-    background: var(--color-success);
-  }
-  .street-legend .warn {
-    background: var(--color-warning);
-  }
-  .street-legend .late {
-    background: var(--color-error);
+  .hero-login-link:hover,
+  .hero-login-link:focus-visible {
+    background-size: 100% 1px;
   }
 </style>
