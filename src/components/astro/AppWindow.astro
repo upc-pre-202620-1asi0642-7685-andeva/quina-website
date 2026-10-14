@@ -23,7 +23,6 @@ const sidebar = ['Inicio', 'Vender', 'Clientes', 'Créditos', 'Inventario', 'Rep
     <span class="dot"></span>
     <span class="dot"></span>
     <span class="dot"></span>
-    <span class="app-url">app.quina.andeva.tech/clientes/rosa-quispe</span>
   </div>
 
   <div class="app-body">
@@ -48,19 +47,19 @@ const sidebar = ['Inicio', 'Vender', 'Clientes', 'Créditos', 'Inventario', 'Rep
           <p class="app-crumb">Clientes / Rosa Quispe</p>
           <h3 class="app-title">Rosa Quispe Huamán</h3>
         </div>
-        <span class="badge">Al día</span>
+        <span class="badge" data-app-badge>Al día</span>
       </div>
 
       <div class="app-kpis">
         <div class="kpi">
           <small>Saldo del ciclo</small>
-          <strong>{soles(186.4)}</strong>
+          <strong data-count="186.4">{soles(186.4)}</strong>
         </div>
         <div class="kpi">
           <small>Límite disponible</small>
-          <strong>{soles(113.6)}</strong>
+          <strong data-count="113.6">{soles(113.6)}</strong>
           <span class="bar">
-            <span style="width: 62%"></span>
+            <span style="width: 62%" data-app-bar></span>
           </span>
         </div>
         <div class="kpi">
@@ -84,7 +83,7 @@ const sidebar = ['Inicio', 'Vender', 'Clientes', 'Créditos', 'Inventario', 'Rep
         </thead>
         <tbody>
           {purchases.map((p) => (
-            <tr>
+            <tr data-app-row>
               <td>{p.date}</td>
               <td>{p.item}</td>
               <td>{p.qty}</td>
@@ -124,15 +123,6 @@ const sidebar = ['Inicio', 'Vender', 'Clientes', 'Créditos', 'Inventario', 'Rep
     height: 10px;
     border-radius: 50%;
     background: #d6d9d3;
-  }
-
-  .app-url {
-    margin-left: 14px;
-    padding: 4px 12px;
-    border-radius: 6px;
-    background: #fff;
-    color: #6b746d;
-    font-size: 12px;
   }
 
   .app-body {
@@ -298,9 +288,6 @@ const sidebar = ['Inicio', 'Vender', 'Clientes', 'Créditos', 'Inventario', 'Rep
     }
     .app-main {
       padding: 16px;
-    }
-    .app-url {
-      display: none;
     }
   }
 </style>

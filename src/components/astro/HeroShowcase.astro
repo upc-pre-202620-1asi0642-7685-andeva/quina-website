@@ -1,0 +1,755 @@
+---
+/**
+ * Escenario del producto bajo el hero, al estilo Evernote: la ventana de la app y
+ * cuatro tarjetas que se construyen, rebotan y cambian de estado en secuencia.
+ * La historia: Don Lucho fía a Rosa → Quina cuida el límite → cobra sola → Rosa paga.
+ * Sin JS (o con movimiento reducido) se ve el estado final completo.
+ */
+import AppWindow from './AppWindow.astro';
+import { home } from '@/i18n/home';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const c = home[lang].hero;
+
+const check = 'M7 12.5l3.2 3.2L17 9';
+---
+
+<div class="stage" data-show aria-hidden="true">
+  <div class="stage-window" data-show-window>
+    <AppWindow />
+  </div>
+
+  <!-- Izquierda: la venta al fiado se arma ítem por ítem y Quina valida el límite -->
+  <div class="card card-sale" data-show-card="sale" data-ui>
+    <p class="card-kicker">{c.sale}</p>
+    <div class="sale-who">
+      <span class="avatar">RQ</span>
+      <strong>Rosa Quispe</strong>
+    </div>
+    <ul class="sale-items">
+      {c.saleItems.map(([name, price]) => (
+        <li data-sale-item>
+          <span>{name}</span>
+          <span class="num">{price}</span>
+        </li>
+      ))}
+    </ul>
+    <div class="sale-limit">
+      <span>{c.saleLimit}</span>
+      <span class="limit-bar">
+        <span data-sale-bar></span>
+      </span>
+    </div>
+    <div class="sale-ok" data-sale-ok>
+      <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
+        <path d={check} stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      {c.saleOk}
+    </div>
+  </div>
+
+  <!-- Arriba a la derecha: la cobranza del día se va tachando sola -->
+  <div class="card card-tasks" data-show-card="tasks" data-ui>
+    <p class="card-kicker">{c.tasksTitle}</p>
+    <ul class="tasks">
+      {c.tasks.map(([title, due], i) => (
+        <li class="task" data-task={i}>
+          <span class="task-check">
+            <span class="task-fill" data-task-fill></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={check} pathLength="1" data-task-tick />
+            </svg>
+          </span>
+          <span class="task-text">
+            <span class="task-title">
+              {title}
+              <span class="task-strike" data-task-strike></span>
+            </span>
+            <small>{due}</small>
+          </span>
+          <span class="task-avatar">{i === 0 ? 'R' : 'J'}</span>
+        </li>
+      ))}
+      <li class="task task-new" data-task-new>
+        <span class="task-check"></span>
+        <span class="task-text">{c.taskNew}</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Derecha: el calendario de pagos avanza hasta el día de Rosa y se marca pagado -->
+  <div class="card card-cal" data-show-card="cal" data-ui>
+    <div class="cal-head">
+      <span class="cal-arrow">←</span>
+      <strong>{c.calTitle}</strong>
+      <span class="cal-arrow">→</span>
+    </div>
+    <div class="cal-track">
+      <span class="cal-line"></span>
+      <span class="cal-dot" data-cal-dot></span>
+    </div>
+    <ul class="cal-events">
+      {c.calEvents.map(([day, name, amount], i) => (
+        <li class:list={['cal-event', i === 0 ? 'is-green' : 'is-amber']} data-cal-event={i}>
+          <small>{day}</small>
+          <span class="cal-name">{name}</span>
+          <span class="num">{amount}</span>
+          {i === 0 && (
+            <span class="cal-paid" data-cal-paid>
+              {c.calPaid}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- Sobre la tabla: el recordatorio se escribe (puntos) y llega el mensaje -->
+  <div class="card card-mail" data-show-card="mail" data-ui>
+    <div class="mail-head">
+      <span class="mail-icon">
+        <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
+          <path d="M4 6h16v12H4zM4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round" />
+        </svg>
+      </span>
+      <span class="mail-meta">
+        <strong>{c.mailTitle}</strong>
+        <small>{c.mailAgo}</small>
+      </span>
+    </div>
+    <div class="mail-content">
+      <span class="typing" data-mail-typing>
+        <i></i><i></i><i></i>
+      </span>
+      <p class="mail-body" data-mail-body set:html={c.mailBody} />
+    </div>
+  </div>
+</div>
+
+<style>
+  .stage {
+    position: relative;
+    width: min(100%, 72rem);
+    margin: 5rem auto 0;
+    padding: 2.5rem 0.5rem 3rem;
+  }
+
+  @media (min-width: 768px) {
+    .stage {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* Tarjetas: sombra plana desplazada, como las de Evernote */
+  .card {
+    position: absolute;
+    z-index: 2;
+    padding: 1rem;
+    border-radius: 16px;
+    background: #fff;
+    color: #262626;
+    font-size: 13px;
+    box-shadow:
+      0 0 0 1px rgb(10 46 23 / 0.07),
+      12px 12px 0 0 #e7eae4;
+  }
+
+  .card-kicker {
+    color: #5f6862;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-accent-soft);
+    color: #7a4a00;
+    font-weight: 700;
+    font-size: 11px;
+  }
+
+  /* --- Venta --- */
+  .card-sale {
+    left: -1.5rem;
+    top: 30%;
+    width: 16rem;
+  }
+
+  .sale-who {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .sale-items {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .sale-items li {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: #f6f7f5;
+  }
+
+  .sale-limit {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+    color: #5f6862;
+    font-size: 11px;
+  }
+
+  .limit-bar {
+    height: 6px;
+    border-radius: 6px;
+    background: #eef0ec;
+    overflow: hidden;
+  }
+
+  .limit-bar span {
+    display: block;
+    width: 38%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+    transform-origin: left;
+  }
+
+  .sale-ok {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    font-size: 12px;
+    transform-origin: left center;
+  }
+
+  /* --- Tareas --- */
+  .card-tasks {
+    right: 16%;
+    top: 0;
+    width: 18.5rem;
+  }
+
+  .tasks {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 6px;
+    border-radius: 10px;
+  }
+
+  .task-check {
+    position: relative;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+  }
+
+  .task-fill {
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: var(--color-primary);
+  }
+
+  .task-check svg {
+    position: absolute;
+    inset: -2px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .task-check path {
+    fill: none;
+    stroke: var(--color-primary-dark);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+  }
+
+  .task-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Una sola línea: el tachado tiene que cruzar el texto, no caer entre dos renglones */
+  .task-title {
+    position: relative;
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+
+  .task-strike {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 52%;
+    height: 1.5px;
+    background: currentColor;
+    transform-origin: left;
+  }
+
+  .task-text small {
+    display: block;
+    color: #6b746d;
+    font-size: 11px;
+  }
+
+  .task-avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #3d2600;
+    font-weight: 700;
+    font-size: 11px;
+  }
+
+  .task[data-task='1'] .task-avatar {
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  /* La segunda tarea ocupa el lugar de "Nuevo recordatorio": se escribe ahí, sin mover la tarjeta */
+  .task[data-task='1'],
+  .task-new {
+    grid-area: 2 / 1;
+  }
+
+  .task-new {
+    align-items: center;
+    align-self: start;
+    background: #f6f7f5;
+    color: #8a938c;
+    opacity: 0;
+  }
+
+  .task-new .task-check {
+    border-color: #c9cfc9;
+  }
+
+  /* --- Calendario --- */
+  /* overflow: los eventos entran deslizándose desde la derecha sin asomar fuera de la tarjeta */
+  .card-cal {
+    right: -2rem;
+    top: 40%;
+    width: 16.5rem;
+    overflow: hidden;
+  }
+
+  .cal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+
+  .cal-arrow {
+    color: #8a938c;
+  }
+
+  .cal-track {
+    position: relative;
+    height: 10px;
+    margin: 14px 4px 12px;
+  }
+
+  .cal-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 4px;
+    height: 2px;
+    background: #dfe5dc;
+  }
+
+  .cal-dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-primary-dark);
+  }
+
+  .cal-events {
+    display: grid;
+    gap: 8px;
+  }
+
+  .cal-event {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px 10px 12px;
+    border-left: 3px solid;
+    border-radius: 6px 10px 10px 6px;
+  }
+
+  .cal-event small {
+    color: #5f6862;
+    font-size: 11px;
+  }
+
+  .cal-name {
+    font-weight: 500;
+  }
+
+  .is-green {
+    border-color: var(--color-success);
+    background: #e6f7e4;
+  }
+
+  .is-amber {
+    border-color: var(--color-warning);
+    background: #fdf3d8;
+  }
+
+  .cal-paid {
+    position: absolute;
+    right: 8px;
+    top: -9px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--color-primary-dark);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  /* --- Recordatorio --- */
+  .card-mail {
+    left: 44%;
+    bottom: 1.5rem;
+    width: 17.5rem;
+  }
+
+  .mail-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mail-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--color-primary-dark);
+    color: var(--color-primary);
+  }
+
+  .mail-meta strong,
+  .mail-meta small {
+    display: block;
+  }
+
+  .mail-meta small {
+    color: #5f6862;
+    font-size: 11px;
+  }
+
+  /* Puntos y mensaje comparten celda: la tarjeta no cambia de alto al pasar de uno a otro */
+  .mail-content {
+    display: grid;
+    margin-top: 10px;
+  }
+
+  .typing,
+  .mail-body {
+    grid-area: 1 / 1;
+  }
+
+  .typing {
+    display: flex;
+    gap: 4px;
+    align-self: start;
+    width: max-content;
+    padding: 10px 12px;
+    border-radius: 12px 12px 12px 4px;
+    background: #f1f3ef;
+    opacity: 0;
+  }
+
+  .typing i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #8a938c;
+  }
+
+  .mail-body {
+    line-height: 1.5;
+    color: #4f5a52;
+  }
+
+  .mail-body :global(strong) {
+    color: #262626;
+  }
+
+  /* Laptop chica: las tarjetas laterales dejan de sobresalir para no salirse de la pantalla */
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .card-sale {
+      left: 0.5rem;
+    }
+    .card-cal {
+      right: 0.5rem;
+    }
+    .card-tasks {
+      right: 22%;
+    }
+  }
+
+  /* Tablet y móvil: solo la ventana, las tareas y el recordatorio */
+  @media (max-width: 1023px) {
+    .card-sale,
+    .card-cal {
+      display: none;
+    }
+    .card-tasks {
+      right: 1rem;
+      top: 0;
+      width: min(17rem, 78%);
+    }
+    .card-mail {
+      left: auto;
+      right: 1.5rem;
+      bottom: 0;
+      width: min(17rem, 82%);
+    }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, prefersReducedMotion } from '@/utils/gsap';
+
+  const root = document.querySelector<HTMLElement>('[data-show]');
+
+  if (root && !prefersReducedMotion()) {
+    const q = <T extends Element = HTMLElement>(s: string) => [...root.querySelectorAll<T>(s)];
+    const one = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+
+    const win = one('[data-show-window]');
+    const cards = {
+      sale: one('[data-show-card="sale"]'),
+      tasks: one('[data-show-card="tasks"]'),
+      cal: one('[data-show-card="cal"]'),
+      mail: one('[data-show-card="mail"]'),
+    };
+    const rows = q('[data-app-row]');
+    const counts = q('[data-count]');
+    const appBar = one('[data-app-bar]');
+    const badge = one('[data-app-badge]');
+    const saleItems = q('[data-sale-item]');
+    const saleBar = one('[data-sale-bar]');
+    const saleOk = one('[data-sale-ok]');
+    const tasks = q('[data-task]');
+    const fills = q('[data-task-fill]');
+    const ticks = q<SVGPathElement>('[data-task-tick]');
+    const strikes = q('[data-task-strike]');
+    const titles = q('.task-title');
+    const taskNew = one('[data-task-new]');
+    const calDot = one('[data-cal-dot]');
+    const calEvents = q('[data-cal-event]');
+    const calPaid = one('[data-cal-paid]');
+    const typing = one('[data-mail-typing]');
+    const typingDots = q('[data-mail-typing] i');
+    const mailBody = one('[data-mail-body]');
+
+    const soles = (n: number) =>
+      'S/ ' + n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    // Rebote de "pop" para las tarjetas y rebote más marcado para los detalles chicos
+    const pop = 'back.out(1.7)';
+    const snap = 'back.out(3)';
+
+    const countUp = (el: HTMLElement, duration: number) => {
+      const target = Number(el.dataset['count']);
+      const v = { n: 0 };
+      return gsap.to(v, {
+        n: target,
+        duration,
+        ease: 'power3.out',
+        onUpdate: () => (el.textContent = soles(v.n)),
+      });
+    };
+
+    const checkTask = (i: number) =>
+      gsap
+        .timeline()
+        .to(fills[i]!, { autoAlpha: 1, scale: 1, duration: 0.5, ease: snap })
+        .to(ticks[i]!, { strokeDashoffset: 0, duration: 0.35, ease: 'power2.out' }, 0.15)
+        .to(strikes[i]!, { scaleX: 1, duration: 0.6, ease: 'power2.inOut' }, 0.3)
+        .to(titles[i]!, { color: '#8a938c', duration: 0.4 }, 0.4);
+
+    // Puntos de "escribiendo": cada uno salta un poco después del anterior
+    const dots = gsap.to(typingDots, {
+      y: -4,
+      duration: 0.32,
+      ease: 'sine.inOut',
+      stagger: { each: 0.12, repeat: -1, yoyo: true },
+      paused: true,
+    });
+
+    const cardIn = { autoAlpha: 1, y: 0, scale: 1, duration: 0.8, ease: pop };
+    // Pausa entre tarjetas: la anterior termina toda su animación antes de que salga la siguiente
+    const beat = '+=0.9';
+
+    // En desktop entran las cuatro tarjetas; en tablet y móvil solo las que se ven (tareas y recordatorio)
+    const mm = gsap.matchMedia();
+    mm.add({ wide: '(min-width: 1024px)' }, (ctx) => {
+      const wide = Boolean(ctx.conditions?.['wide']);
+
+      // Estado inicial: todo listo para construirse
+      gsap.set(win, { autoAlpha: 0, y: 60 });
+      gsap.set(rows, { autoAlpha: 0, y: 10 });
+      gsap.set([appBar, saleBar], { scaleX: 0, transformOrigin: 'left center' });
+      gsap.set(badge, { autoAlpha: 0, scale: 0.6 });
+      gsap.set(Object.values(cards), { autoAlpha: 0, y: 36, scale: 0.92 });
+      gsap.set(saleItems, { autoAlpha: 0, x: -12 });
+      gsap.set(saleOk, { autoAlpha: 0, scale: 0.8 });
+      gsap.set(fills, { scale: 0.4, autoAlpha: 0 });
+      gsap.set(ticks, { strokeDashoffset: 1 });
+      gsap.set(strikes, { scaleX: 0 });
+      gsap.set(titles, { color: '#262626' });
+      gsap.set(tasks[1]!, { autoAlpha: 0, y: 8 });
+      gsap.set(taskNew, { autoAlpha: 1 });
+      gsap.set(calDot, { x: 0 });
+      gsap.set(calEvents, { autoAlpha: 0, x: 24 });
+      gsap.set(calPaid, { autoAlpha: 0, scale: 0.5 });
+      gsap.set(typing, { autoAlpha: 1, scale: 1 });
+      gsap.set(mailBody, { autoAlpha: 0, y: 6 });
+
+      // Una sola secuencia, en orden. Al terminar todo se va y vuelve a empezar desde la ventana vacía.
+      const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.8, defaults: { ease: 'expo.out' } });
+
+      tl.add(() => dots.pause(), 0);
+
+      // 0) La ventana de la app se arma
+      tl.to(win, { autoAlpha: 1, y: 0, duration: 1.2 })
+        .to(rows, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.07 }, '-=0.7')
+        .add(counts.map((el) => countUp(el, 1.4)), '<')
+        .to(appBar, { scaleX: 1, duration: 1.2, ease: 'power3.out' }, '<0.1')
+        .to(badge, { autoAlpha: 1, scale: 1, duration: 0.5, ease: snap }, '-=0.4');
+
+      // 1) Venta al fiado: los productos entran, se llena el límite y Quina la aprueba
+      if (wide) {
+        tl.to(cards.sale, cardIn, '+=0.5')
+          .to(saleItems, { autoAlpha: 1, x: 0, duration: 0.5, stagger: 0.35, ease: pop }, '+=0.15')
+          .to(saleBar, { scaleX: 1, duration: 1, ease: 'power3.out' }, '+=0.2')
+          .to(saleOk, { autoAlpha: 1, scale: 1, duration: 0.55, ease: snap }, '+=0.1');
+      }
+
+      // 2) Cobranza de hoy: se tacha la primera, se escribe la segunda y también se tacha
+      tl.to(cards.tasks, cardIn, wide ? beat : '+=0.5')
+        .add(checkTask(0), '+=0.5')
+        .to(taskNew, { autoAlpha: 0, duration: 0.2 }, '+=0.4')
+        .to(tasks[1]!, { autoAlpha: 1, y: 0, duration: 0.5, ease: pop }, '<0.1')
+        .add(checkTask(1), '+=0.6');
+
+      // 3) Recordatorio: "escribiendo…" y llega el mensaje
+      tl.to(cards.mail, cardIn, beat)
+        .add(() => dots.play(), '<')
+        .to(typing, { autoAlpha: 0, scale: 0.9, duration: 0.25, ease: 'power2.out' }, '+=1.6')
+        .add(() => dots.pause())
+        .to(mailBody, { autoAlpha: 1, y: 0, duration: 0.5 }, '<0.1');
+
+      // 4) Calendario: avanza hasta el día de Rosa y se marca pagado
+      if (wide) {
+        tl.to(cards.cal, cardIn, beat)
+          .to(calEvents, { autoAlpha: 1, x: 0, duration: 0.5, stagger: 0.25, ease: pop }, '+=0.1')
+          .to(
+            calDot,
+            { x: () => (calDot.parentElement!.clientWidth - 10) * 0.35, duration: 1, ease: 'power3.inOut' },
+            '+=0.4',
+          )
+          .to(calEvents[0]!, { scale: 1.04, duration: 0.18, yoyo: true, repeat: 1, ease: 'power2.out' })
+          .to(calPaid, { autoAlpha: 1, scale: 1, duration: 0.55, ease: snap }, '<0.05');
+      }
+
+      // 5) Pausa para mirar el resultado, y salida: tarjetas en orden inverso y luego la ventana
+      const shown = wide ? [cards.cal, cards.mail, cards.tasks, cards.sale] : [cards.mail, cards.tasks];
+      tl.addLabel('exit', '+=3')
+        .to(shown, { autoAlpha: 0, y: 24, scale: 0.94, duration: 0.45, stagger: 0.12, ease: 'power2.out' }, 'exit')
+        .to(win, { autoAlpha: 0, y: 40, duration: 0.6, ease: 'power2.out' }, '>-0.1');
+
+      let started = false;
+      ScrollTrigger.create({
+        trigger: root,
+        start: 'top 75%',
+        once: true,
+        onEnter: () => {
+          started = true;
+          tl.play();
+        },
+      });
+
+      // Fuera de pantalla no gasta frames
+      ScrollTrigger.create({
+        trigger: root,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: (self) => {
+          if (!started) return;
+          if (self.isActive) {
+            tl.resume();
+            if (gsap.getProperty(typing, 'opacity') === 1 && gsap.getProperty(cards.mail, 'opacity') === 1)
+              dots.resume();
+          } else {
+            tl.pause();
+            dots.pause();
+          }
+        },
+      });
+
+      return () => dots.pause();
+    });
+  }
+</script>
