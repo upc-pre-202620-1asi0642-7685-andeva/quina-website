@@ -1,0 +1,131 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/astro/page/PageHero.astro';
+import DetailGrid from '@/components/astro/page/DetailGrid.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+import Picture from '@/components/astro/Picture.astro';
+
+const values = [
+  {
+    title: 'Confiable como un buen socio',
+    text: 'Las cuentas se calculan igual todos los meses y cada cifra se puede explicar.',
+  },
+  {
+    title: 'Justo como un árbitro',
+    text: 'El mismo detalle para el bodeguero y para el vecino. Nadie sabe más que el otro.',
+  },
+  {
+    title: 'Trabajador como el casero',
+    text: 'Hecho para el mostrador real: rápido, en el celular y sin palabras de banco.',
+  },
+];
+
+const notUs = [
+  {
+    title: 'No prestamos plata',
+    text: 'Quina es software. El crédito lo das tú, con tus reglas y tus productos.',
+  },
+  {
+    title: 'No cobramos comisión',
+    text: 'Pagas un plan fijo, o nada. Tus ventas son completamente tuyas.',
+  },
+  {
+    title: 'No vendemos datos',
+    text: 'La información de tus vecinos no se comparte con terceros.',
+  },
+];
+---
+
+<BaseLayout
+  title="Nosotros · Quina"
+  description="Quina nace para que el comercio de barrio del Perú fíe con reglas claras y cobre sin incomodidad."
+>
+  <PageHero
+    crumb={{ label: 'Nosotros' }}
+    title="Un socio justo para el comercio del barrio"
+    lead="Más de 530 mil bodegas sostienen el día a día del Perú, y seis de cada diez fían. Quina existe para que ese crédito se lleve con orden y con respeto."
+  />
+
+  <section class="story">
+    <div class="wrap story-grid">
+      <div class="story-media" data-reveal-group>
+        <div class="story-frame" data-reveal>
+          <Picture
+            id="nosotros-arbol-quina"
+            alt="Lámina botánica antigua del árbol de la quina, con hojas y flores"
+            tone="green"
+          />
+        </div>
+      </div>
+      <div class="story-copy" data-reveal-group>
+        <h2 class="story-title" data-split>
+          Por qué Quina
+        </h2>
+        <p data-reveal>
+          El árbol de la quina está en el escudo nacional del Perú. Representa la riqueza de nuestra
+          tierra y crece firme, sin apuro.
+        </p>
+        <p data-reveal>
+          En el barrio, además, «la quina» es la plata ganada con esfuerzo, la que cambia de mano
+          todos los días en el mostrador.
+        </p>
+        <p data-reveal>
+          Quina junta las dos ideas: un negocio sano que crece y una plata que se cuida. Por eso el
+          nombre.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <DetailGrid title="Cómo trabajamos" details={values} />
+  <DetailGrid title="Lo que no somos" details={notUs} dark />
+  <CtaBand title="Ordena tu fiado con nosotros" />
+</BaseLayout>
+
+<style>
+  .story {
+    padding-block: clamp(6rem, 4rem + 6vw, 10rem);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .story-grid {
+    display: grid;
+    gap: 3rem;
+  }
+
+  @media (min-width: 960px) {
+    .story-grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 5rem;
+    }
+  }
+
+  .story-frame {
+    aspect-ratio: 4 / 5;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .story-title {
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
+
+  .story-copy p {
+    max-width: 34rem;
+    font-size: 1.1875rem;
+    line-height: 1.6;
+  }
+
+  .story-copy p + p {
+    margin-top: 1.25rem;
+  }
+</style>

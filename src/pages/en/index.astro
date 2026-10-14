@@ -1,0 +1,26 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/astro/Hero.astro';
+import Problem from '@/components/astro/Problem.astro';
+import Marquee from '@/components/astro/Marquee.astro';
+import Features from '@/components/astro/Features.astro';
+import HowItWorks from '@/components/astro/HowItWorks.astro';
+import Calculator from '@/components/astro/Calculator.astro';
+import Pricing from '@/components/astro/Pricing.astro';
+import FaqSection from '@/components/astro/FaqSection.astro';
+import { home } from '@/i18n/home';
+import { homeFaqEn } from '@/data/faq';
+
+const c = home.en;
+---
+
+<BaseLayout title={c.meta.title} description={c.meta.description} lang="en">
+  <Hero lang="en" />
+  <Problem lang="en" />
+  <Marquee text={c.marquee} />
+  <Features lang="en" />
+  <HowItWorks lang="en" />
+  <Calculator lang="en" />
+  <Pricing lang="en" />
+  <FaqSection id="faq" title={c.faqTitle} items={homeFaqEn} />
+</BaseLayout>

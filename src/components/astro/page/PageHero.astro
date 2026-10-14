@@ -1,0 +1,126 @@
+---
+import Button from '../Button.astro';
+import Picture from '../Picture.astro';
+import { appLinks } from '@/i18n/ui';
+
+interface Props {
+  crumb?: { label: string; href?: string };
+  title: string;
+  lead: string;
+  image?: string;
+  imageAlt?: string;
+  secondary?: { label: string; href: string };
+}
+
+const { crumb, title, lead, image, imageAlt = '', secondary } = Astro.props;
+---
+
+<section class:list={['page-hero', { 'has-image': !!image }]}>
+  <div class="page-hero-card">
+    <div class="page-hero-copy" data-reveal-group>
+      {crumb && (
+        <p class="crumb" data-reveal>
+          {crumb.href ? <a href={crumb.href}>{crumb.label}</a> : crumb.label}
+        </p>
+      )}
+      <h1 class="page-title" data-split>
+        {title}
+      </h1>
+      <p class="page-lead" data-reveal>
+        {lead}
+      </p>
+      <div class="page-actions" data-reveal>
+        <Button href={appLinks.signup} size="lg">
+          Empieza gratis
+        </Button>
+        {secondary && (
+          <Button href={secondary.href} variant="light" size="lg">
+            {secondary.label}
+          </Button>
+        )}
+      </div>
+    </div>
+
+    {image && (
+      <div class="page-hero-media" data-parallax>
+        <Picture id={image} alt={imageAlt} tone="green" loading="eager" />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    padding: 0 0.75rem;
+  }
+
+  .page-hero-card {
+    display: grid;
+    gap: 2.5rem;
+    padding: clamp(3rem, 2rem + 4vw, 6rem) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+    border-radius: 28px;
+    background: var(--color-soft);
+    color: var(--color-soft-ink);
+    overflow: hidden;
+  }
+
+  @media (min-width: 960px) {
+    .has-image .page-hero-card {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 4rem;
+    }
+  }
+
+  .page-hero:not(.has-image) .page-hero-copy {
+    text-align: center;
+    display: grid;
+    justify-items: center;
+  }
+
+  .crumb {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-link-active);
+  }
+
+  .crumb a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .page-title {
+    max-width: 16ch;
+    font-size: clamp(2.5rem, 1.4rem + 4.2vw, 5.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .page-lead {
+    max-width: 34rem;
+    margin-top: 1.5rem;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    line-height: 1.55;
+    color: var(--color-soft-ink-2);
+  }
+
+  .page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.25rem;
+  }
+
+  .page-hero:not(.has-image) .page-actions {
+    justify-content: center;
+  }
+
+  .page-hero-media {
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+</style>

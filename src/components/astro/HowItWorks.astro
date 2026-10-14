@@ -1,0 +1,161 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import Picture from './Picture.astro';
+import { home } from '@/i18n/home';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const c = home[lang].how;
+
+// El video de presentación (HyperFrames) se coloca en public/video/quina-presentacion.mp4
+const hasVideo = fs.existsSync(
+  path.join(process.cwd(), 'public', 'video', 'quina-presentacion.mp4'),
+);
+---
+
+<section id={c.id} class="how" aria-labelledby="how-title">
+  <div class="wrap how-head" data-reveal-group>
+    <h2 id="how-title" class="how-title" data-split>
+      {c.title}
+    </h2>
+    <p class="how-lead" data-reveal>
+      {c.lead}
+    </p>
+  </div>
+
+  <div class="video-stage" data-video-stage>
+    <div class="video-frame" data-video-frame>
+      {hasVideo ? (
+        <video
+          class="video"
+          src="/video/quina-presentacion.mp4"
+          playsinline
+          muted
+          loop
+          preload="none"
+          controls
+          data-video
+        />
+      ) : (
+        <>
+          <Picture id="video-poster" alt={c.posterAlt} tone="dark" />
+          <span class="play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" class="size-7">
+              <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
+            </svg>
+          </span>
+        </>
+      )}
+    </div>
+  </div>
+
+  <ol class="wrap steps" data-reveal-group>
+    {c.steps.map((s) => (
+      <li class="step" data-reveal>
+        <h3 class="step-title">{s.title}</h3>
+        <p class="step-text">{s.text}</p>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .how {
+    padding-block: clamp(7rem, 5rem + 8vw, 12rem);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .how-head {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .how-title {
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .how-lead {
+    font-size: 1.125rem;
+    color: var(--color-ink-soft);
+  }
+
+  .video-stage {
+    margin-top: clamp(3rem, 2rem + 4vw, 5rem);
+    padding-inline: 0.75rem;
+  }
+
+  .video-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    max-height: calc(100svh - 1.5rem);
+    margin-inline: auto;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #0b120d;
+    will-change: transform;
+  }
+
+  .video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    display: grid;
+    place-items: center;
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  .steps {
+    display: grid;
+    gap: 2.5rem;
+    margin-top: clamp(4rem, 3rem + 3vw, 6rem);
+  }
+
+  @media (min-width: 900px) {
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3rem;
+    }
+  }
+
+  .step {
+    padding-top: 1.5rem;
+    border-top: 3px solid var(--color-primary);
+  }
+
+  .step-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .step-text {
+    margin-top: 0.75rem;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+  }
+</style>

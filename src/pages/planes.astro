@@ -1,0 +1,130 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/astro/page/PageHero.astro';
+import Pricing from '@/components/astro/Pricing.astro';
+import FaqSection from '@/components/astro/FaqSection.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+import { faqGroups } from '@/data/faq';
+
+const rows: [string, string, string, string][] = [
+  ['Vecinos con crédito activo', 'Hasta 15', 'Ilimitados', 'Ilimitados'],
+  ['Usuarios por tienda', '1 (tú)', 'Hasta 3', 'Ilimitados'],
+  ['Productos en catálogo', 'Hasta 50', 'Ilimitados', 'Ilimitados'],
+  ['Motor financiero (cuotas, mora)', 'Completo', 'Completo', 'Completo'],
+  ['Inventario', 'Stock actual', 'Kardex y costo promedio', 'Kardex y costo promedio'],
+  ['Comprobantes de compra', '—', '50 al mes', 'Ilimitados'],
+  ['Avisos por correo', 'Manuales', 'Automáticos', 'Automáticos prioritarios'],
+  ['Reportes', 'Vista básica', 'Excel y PDF', 'Multi-reporte'],
+  ['Asistente con IA', '—', '20 consultas al mes', '100 consultas al mes'],
+];
+---
+
+<BaseLayout
+  title="Precios · Quina"
+  description="Plan Casero gratis hasta 15 vecinos. Bodega Pro a S/ 29 al mes y Negocio Plus a S/ 69 al mes. Tus vecinos nunca pagan nada."
+>
+  <PageHero
+    crumb={{ label: 'Precios' }}
+    title="Menos de un sol al día"
+    lead="Tus vecinos nunca pagan nada. Una sola deuda de S/ 30 que recuperes ya paga el mes de Bodega Pro."
+  />
+
+  <Pricing heading={false} />
+
+  <section class="compare" aria-labelledby="compare-title">
+    <div class="wrap">
+      <h2 id="compare-title" class="compare-title" data-split>
+        Compara los planes
+      </h2>
+      <!-- La tabla se desplaza en móvil: la región necesita foco para usarse con teclado -->
+      <div
+        class="table-wrap"
+        data-reveal-group
+        tabindex="0"
+        role="region"
+        aria-labelledby="compare-title"
+      >
+        <table data-reveal>
+          <thead>
+            <tr>
+              <th scope="col">
+                <span class="sr-only">Característica</span>
+              </th>
+              <th scope="col">Casero</th>
+              <th scope="col" class="featured">
+                Bodega Pro
+              </th>
+              <th scope="col">Negocio Plus</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(([label, a, b, c]) => (
+              <tr>
+                <th scope="row">{label}</th>
+                <td>{a}</td>
+                <td class="featured">{b}</td>
+                <td>{c}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <FaqSection id="preguntas-planes" title="Sobre pagos y planes" items={faqGroups[1]!.items} />
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .compare {
+    padding-block: clamp(4rem, 3rem + 4vw, 8rem);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .compare-title {
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .table-wrap {
+    margin-top: 3rem;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    min-width: 40rem;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+
+  th,
+  td {
+    padding: 1.125rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  thead th {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  tbody th {
+    font-weight: 500;
+    color: var(--color-ink-soft);
+  }
+
+  .featured {
+    background: var(--color-soft);
+    color: var(--color-soft-ink);
+    font-weight: 600;
+  }
+</style>

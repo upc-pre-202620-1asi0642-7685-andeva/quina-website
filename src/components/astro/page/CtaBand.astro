@@ -1,0 +1,70 @@
+---
+import Button from '../Button.astro';
+import { appLinks } from '@/i18n/ui';
+
+interface Props {
+  title?: string;
+  text?: string;
+}
+
+const {
+  title = 'Deja el cuaderno este mes',
+  text = 'Empieza gratis con tus primeros 15 vecinos. Sin tarjeta y en dos minutos.',
+} = Astro.props;
+---
+
+<section class="cta-band">
+  <div class="cta-card" data-reveal-group>
+    <h2 class="cta-title" data-split>
+      {title}
+    </h2>
+    <p class="cta-text" data-reveal>
+      {text}
+    </p>
+    <div data-reveal>
+      <Button href={appLinks.signup} size="lg">
+        Registra tu bodega gratis
+      </Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    padding: 0 0.75rem clamp(6rem, 4rem + 6vw, 10rem);
+  }
+
+  .cta-card {
+    display: grid;
+    justify-items: center;
+    gap: 1.5rem;
+    padding: clamp(4rem, 3rem + 5vw, 8rem) 1.5rem;
+    border-radius: 28px;
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+    text-align: center;
+  }
+
+  .cta-title {
+    max-width: 16ch;
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+  }
+
+  .cta-text {
+    max-width: 32rem;
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+
+  .cta-card :global(.btn-primary) {
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  .cta-card :global(.btn-primary:hover) {
+    background: #12462a;
+  }
+</style>

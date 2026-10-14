@@ -1,0 +1,198 @@
+---
+import Picture from './Picture.astro';
+import { home } from '@/i18n/home';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const c = home[lang].features;
+---
+
+<section id={c.id} class="features" aria-labelledby="features-title">
+  <div class="features-head wrap" data-reveal-group>
+    <h2 id="features-title" class="features-title" data-split set:html={c.title} />
+    <p class="features-lead" data-reveal>
+      {c.lead}
+    </p>
+  </div>
+
+  {c.items.map((f, i) => (
+    <article class:list={['feature', { reverse: i % 2 === 1 }]}>
+      <span class="feature-rule" data-rule aria-hidden="true" />
+      <div class="feature-inner wrap">
+        <div class="feature-text" data-reveal-group>
+          <p class="feature-tag" data-reveal>
+            {String(i + 1).padStart(2, '0')} / {f.tag}
+          </p>
+          <h3 class="feature-title" data-reveal>
+            {f.title}
+          </h3>
+          <p class="feature-copy" data-reveal>
+            {f.text}
+          </p>
+          <ul class="feature-items" data-reveal>
+            {f.items.map((it) => (
+              <li>{it}</li>
+            ))}
+          </ul>
+          {f.href && (
+            <a href={f.href} class="feature-more" data-reveal>
+              {c.more}
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M5 12h14m-6-6 6 6-6 6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                />
+              </svg>
+            </a>
+          )}
+        </div>
+
+        <div class="feature-device" data-tilt={i % 2 === 1 ? 'right' : 'left'}>
+          <div class="device-frame">
+            <Picture id={f.image} alt={f.alt} tone="dark" />
+          </div>
+        </div>
+      </div>
+    </article>
+  ))}
+</section>
+
+<style>
+  .features {
+    position: relative;
+    padding-block: clamp(7rem, 5rem + 8vw, 12rem) 0;
+    background: #0b120d;
+    color: #f2f5f2;
+    overflow: hidden;
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .features-head {
+    display: grid;
+    gap: 2rem;
+    padding-bottom: clamp(5rem, 4rem + 4vw, 8rem);
+  }
+
+  @media (min-width: 900px) {
+    .features-head {
+      grid-template-columns: 1.4fr 0.6fr;
+      align-items: end;
+    }
+  }
+
+  .features-title {
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .features-lead {
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: rgb(242 245 242 / 0.72);
+  }
+
+  .feature {
+    position: relative;
+  }
+
+  .feature-rule {
+    display: block;
+    height: 1px;
+    background: rgb(255 255 255 / 0.14);
+    transform-origin: left;
+  }
+
+  .feature-inner {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+    padding-block: clamp(4rem, 3rem + 4vw, 7rem);
+  }
+
+  @media (min-width: 900px) {
+    .feature-inner {
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 4rem;
+    }
+    .reverse .feature-text {
+      order: 2;
+    }
+  }
+
+  .feature-tag {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .feature-title {
+    margin-top: 1.25rem;
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    color: #c9d3cb;
+  }
+
+  .feature-copy {
+    margin-top: 1.5rem;
+    max-width: 30rem;
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: rgb(242 245 242 / 0.86);
+  }
+
+  .feature-items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 2rem;
+    margin-top: 2.25rem;
+    max-width: 30rem;
+    font-size: 0.9375rem;
+    color: rgb(242 245 242 / 0.62);
+  }
+
+  .feature-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2.25rem;
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+
+  .feature-more svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    transition: translate 400ms var(--ease-out-expo);
+  }
+
+  .feature-more:hover svg {
+    translate: 0.375rem 0;
+  }
+
+  .feature-device {
+    perspective: 1400px;
+  }
+
+  .device-frame {
+    aspect-ratio: 16 / 10;
+    border-radius: 18px;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+</style>

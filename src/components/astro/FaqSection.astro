@@ -1,0 +1,127 @@
+---
+import Faq from '@/components/react/Faq';
+import type { FaqItem } from '@/components/react/Faq';
+import { homeFaq } from '@/data/faq';
+
+interface Props {
+  title?: string;
+  items?: FaqItem[];
+  id?: string;
+}
+
+const {
+  title = 'Lo que nos preguntan los caseros',
+  items = homeFaq,
+  id = 'preguntas',
+} = Astro.props;
+const titleId = `${id}-title`;
+---
+
+<section id={id} class="faq-section" aria-labelledby={titleId}>
+  <div class="wrap faq-grid">
+    <div class="faq-head" data-reveal-group>
+      <h2 id={titleId} class="faq-title" data-split>
+        {title}
+      </h2>
+    </div>
+    <div data-reveal-group>
+      <div data-reveal>
+        <Faq client:visible items={items} idPrefix={id} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-section {
+    padding-block: clamp(6rem, 4rem + 6vw, 10rem) clamp(8rem, 6rem + 8vw, 13rem);
+    background: var(--color-paper-deep);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .faq-grid {
+    display: grid;
+    gap: 3rem;
+  }
+
+  @media (min-width: 960px) {
+    .faq-grid {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 5rem;
+    }
+    .faq-head {
+      position: sticky;
+      top: 8rem;
+      align-self: start;
+    }
+  }
+
+  .faq-title {
+    max-width: 13ch;
+    text-wrap: balance;
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  :global(.faq) {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  :global(.faq-item) {
+    border-radius: 20px;
+    background: var(--color-surface);
+    transition: background-color 300ms var(--ease-out-expo);
+  }
+
+  :global(.faq-q) {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.5rem 1.75rem;
+    text-align: left;
+    font-size: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  :global(.faq-icon) {
+    flex: none;
+    color: var(--color-primary-dark);
+    transition: rotate 350ms var(--ease-out-expo);
+  }
+
+  :global(.faq-item.is-open .faq-icon) {
+    rotate: 45deg;
+  }
+
+  :global(.faq-panel) {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 400ms var(--ease-out-expo);
+  }
+
+  :global(.faq-item.is-open .faq-panel) {
+    grid-template-rows: 1fr;
+  }
+
+  :global(.faq-panel-inner) {
+    overflow: hidden;
+  }
+
+  :global(.faq-panel p) {
+    padding: 0 1.75rem 1.75rem;
+    max-width: 40rem;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+</style>

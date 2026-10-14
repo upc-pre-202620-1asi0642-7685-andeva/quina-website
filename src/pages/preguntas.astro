@@ -1,0 +1,24 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/astro/page/PageHero.astro';
+import FaqSection from '@/components/astro/FaqSection.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+import { faqGroups } from '@/data/faq';
+import { site } from '@/data/site';
+---
+
+<BaseLayout
+  title="Preguntas frecuentes · Quina"
+  description="Respuestas sobre cómo usar Quina, sus planes, los intereses y la protección de los datos de tus vecinos."
+>
+  <PageHero
+    crumb={{ label: 'Recursos' }}
+    title="Lo que nos preguntan los caseros"
+    lead="Si tu duda no está aquí, escríbenos y te respondemos con calma."
+    secondary={{ label: 'Escríbenos', href: `mailto:${site.contactEmail}` }}
+  />
+  {faqGroups.map((g, i) => (
+    <FaqSection id={`preguntas-${i}`} title={g.title} items={g.items} />
+  ))}
+  <CtaBand />
+</BaseLayout>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quina.andeva.tech/sitemap-index.xml

@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/astro/page/PageHero.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft && data.lang === 'es')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<BaseLayout
+  title="Blog · Quina"
+  description="Guías prácticas para ordenar el fiado, cobrar sin incomodidad y llevar mejor las cuentas de tu negocio de barrio."
+>
+  <PageHero
+    crumb={{ label: 'Recursos' }}
+    title="Guías para ordenar tu negocio"
+    lead="Ideas prácticas sobre fiado, cobranza y cuentas claras, escritas para el mostrador."
+  />
+
+  <section class="posts">
+    <ul class="wrap post-list">
+      {posts.map((post) => (
+        <li class="post" data-reveal-group>
+          <span class="post-line" data-rule aria-hidden="true" />
+          <a href={`/blog/${post.id}`} class="post-link" data-reveal>
+            <time datetime={post.data.pubDate.toISOString()} class="post-date">
+              {fmt(post.data.pubDate)}
+            </time>
+            <span class="post-body">
+              <span class="post-title">{post.data.title}</span>
+              <span class="post-desc">{post.data.description}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .posts {
+    padding-block: clamp(5rem, 3rem + 5vw, 8rem);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .post-line {
+    display: block;
+    height: 1px;
+    background: var(--color-line);
+    transform-origin: left;
+  }
+
+  .post-link {
+    display: grid;
+    gap: 0.75rem 3rem;
+    padding-block: 2.25rem;
+  }
+
+  @media (min-width: 900px) {
+    .post-link {
+      grid-template-columns: 14rem 1fr;
+    }
+  }
+
+  .post-date {
+    font-size: 1rem;
+    color: var(--color-ink-soft);
+  }
+
+  .post-body {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .post-title {
+    font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    transition: color 200ms ease;
+  }
+
+  .post-link:hover .post-title {
+    color: var(--color-link-active);
+  }
+
+  .post-desc {
+    max-width: 40rem;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+  }
+</style>

@@ -1,0 +1,36 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/astro/page/PageHero.astro';
+import StepsBlock from '@/components/astro/page/StepsBlock.astro';
+import DetailGrid from '@/components/astro/page/DetailGrid.astro';
+import LinkRows from '@/components/astro/page/LinkRows.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+import { productPages, type ProductPage } from '@/data/product';
+
+export const getStaticPaths = (() =>
+  productPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }))) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: ProductPage };
+const related = productPages
+  .filter((p) => p.slug !== page.slug)
+  .map((p) => ({ title: p.nav, text: p.lead.split('.')[0] + '.', href: `/producto/${p.slug}` }));
+---
+
+<BaseLayout title={`${page.metaTitle} · Quina`} description={page.metaDescription}>
+  <PageHero
+    crumb={{ label: 'Producto' }}
+    title={page.title}
+    lead={page.lead}
+    image={page.image}
+    imageAlt={page.imageAlt}
+    secondary={{ label: 'Ver precios', href: '/planes' }}
+  />
+  <StepsBlock title={page.stepsTitle} steps={page.steps} />
+  <DetailGrid title={page.detailsTitle} details={page.details} dark />
+  <LinkRows title="Sigue conociendo Quina" links={related} />
+  <CtaBand />
+</BaseLayout>

@@ -1,0 +1,102 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/astro/page/PageHero.astro';
+import DetailGrid from '@/components/astro/page/DetailGrid.astro';
+import LinkRows from '@/components/astro/page/LinkRows.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+import Button from '@/components/astro/Button.astro';
+import { solutionPages, type SolutionPage } from '@/data/solutions';
+
+export const getStaticPaths = (() =>
+  solutionPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }))) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: SolutionPage };
+const others = solutionPages.filter((s) => s.slug !== page.slug);
+---
+
+<BaseLayout title={`${page.metaTitle} · Quina`} description={page.metaDescription}>
+  <PageHero
+    crumb={{ label: 'Soluciones' }}
+    title={page.title}
+    lead={page.lead}
+    image={page.image}
+    imageAlt={page.imageAlt}
+    secondary={{ label: 'Ver cómo funciona', href: '/#como-funciona' }}
+  />
+
+  <DetailGrid title="Lo que vives en el mostrador" details={page.pains} />
+
+  <LinkRows
+    title="Cómo te ayuda Quina"
+    links={page.fits.map((f) => ({ title: f.title, text: f.text, href: f.href }))}
+  />
+
+  <section class="plan-pick">
+    <div class="plan-card" data-reveal-group>
+      <p class="plan-kicker" data-reveal>
+        Te recomendamos
+      </p>
+      <h2 class="plan-name" data-split>
+        Plan {page.plan.name}
+      </h2>
+      <p class="plan-reason" data-reveal>
+        {page.plan.reason}
+      </p>
+      <div data-reveal>
+        <Button href="/planes" variant="light" size="lg">
+          Comparar planes
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <LinkRows
+    title="Otros negocios"
+    links={others.map((o) => ({
+      title: o.metaTitle.replace('Quina para ', ''),
+      href: `/soluciones/${o.slug}`,
+    }))}
+  />
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .plan-pick {
+    padding: 0 0.75rem;
+  }
+
+  .plan-card {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    padding: clamp(3rem, 2rem + 4vw, 6rem) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+    border-radius: 28px;
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  .plan-kicker {
+    font-size: 1.0625rem;
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .plan-name {
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+  }
+
+  .plan-reason {
+    max-width: 34rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    color: rgb(255 255 255 / 0.82);
+  }
+</style>

@@ -1,0 +1,98 @@
+---
+import Picture from './Picture.astro';
+import { home } from '@/i18n/home';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const c = home[lang].problem;
+---
+
+<section class="problem" aria-labelledby="problem-title">
+  <div class="wrap">
+    <h2 id="problem-title" class="sr-only">
+      {c.srTitle}
+    </h2>
+    <p class="statement" data-scrub-words>
+      {c.statement}
+    </p>
+
+    <div class="problem-grid">
+      <figure class="problem-media" data-reveal-group>
+        <div class="media-frame" data-reveal>
+          <Picture id="cuaderno-fiados" alt={c.imageAlt} tone="amber" />
+        </div>
+      </figure>
+
+      <ul class="pains" data-reveal-group>
+        {c.pains.map((p) => (
+          <li class="pain" data-reveal>
+            <p class="pain-quote">{p.quote}</p>
+            <p class="pain-text">{p.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .problem {
+    padding-block: clamp(9rem, 6rem + 10vw, 14rem) clamp(6rem, 4rem + 6vw, 10rem);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .statement {
+    max-width: 30ch;
+    font-size: clamp(1.75rem, 1.1rem + 2.4vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .problem-grid {
+    display: grid;
+    gap: 3rem;
+    margin-top: clamp(4rem, 3rem + 4vw, 7rem);
+  }
+
+  @media (min-width: 900px) {
+    .problem-grid {
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: end;
+      gap: 5rem;
+    }
+  }
+
+  .media-frame {
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .pains {
+    display: grid;
+    gap: 2.25rem;
+  }
+
+  .pain-quote {
+    font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .pain-text {
+    margin-top: 0.5rem;
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    color: var(--color-ink-soft);
+  }
+</style>

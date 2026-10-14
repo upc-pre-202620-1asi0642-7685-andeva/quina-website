@@ -1,0 +1,256 @@
+---
+import Logo from './Logo.astro';
+import Button from './Button.astro';
+import { site } from '@/data/site';
+import { appLinks, navigation, ui, type Lang } from '@/i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+
+const columns =
+  lang === 'es'
+    ? [
+        {
+          title: 'Producto',
+          links: navigation.es[0]!.children!.map(({ label, href }) => ({ label, href })),
+        },
+        {
+          title: 'Quina',
+          links: [
+            { label: 'Precios', href: '/planes' },
+            { label: 'Soluciones', href: '/soluciones/bodegas' },
+            { label: 'Blog', href: '/blog' },
+            { label: 'Preguntas frecuentes', href: '/preguntas' },
+            { label: 'Nosotros', href: '/nosotros' },
+          ],
+        },
+      ]
+    : [
+        {
+          title: 'Quina',
+          links: navigation[lang].map(({ label, href }) => ({ label, href: href! })),
+        },
+      ];
+
+const legal = [
+  { label: t.privacy, href: '/legal/privacidad' },
+  { label: t.terms, href: '/legal/terminos' },
+  { label: t.cookies, href: '/legal/cookies' },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer" data-footer>
+  <div class="footer-inner" data-footer-inner>
+    <div class="wrap footer-top">
+      <div class="footer-cta">
+        <p class="footer-title">{t.footerTitle}</p>
+        <p class="footer-lead">{t.footerLead}</p>
+        <div class="mt-8">
+          <Button href={appLinks.signup} size="lg">
+            {t.signupLong}
+          </Button>
+        </div>
+      </div>
+
+      <div class="footer-cols">
+        {columns.map((col) => (
+          <div>
+            <p class="footer-col-title">{col.title}</p>
+            <ul>
+              {col.links.map((n) => (
+                <li>
+                  <a href={n.href} class="footer-link">
+                    {n.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        <div>
+          <p class="footer-col-title">{t.footerLegal}</p>
+          <ul>
+            {legal.map((l) => (
+              <li>
+                <a href={l.href} class="footer-link">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <button type="button" class="footer-link" data-cookie-settings>
+                {t.cookieSettings}
+              </button>
+            </li>
+            <li>
+              <a href={`mailto:${site.contactEmail}`} class="footer-link">
+                {site.contactEmail}
+              </a>
+            </li>
+            <li>
+              <a href="/libro-de-reclamaciones" class="claims">
+                <svg viewBox="0 0 24 24" class="size-6" aria-hidden="true">
+                  <path
+                    d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM13 4h5.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H13z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                  ></path>
+                </svg>
+                {t.claims}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap footer-mark" aria-hidden="true">
+      <Logo class="footer-logo" title="" />
+    </div>
+
+    <div class="wrap footer-bottom">
+      <p>
+        © {year} Quina. {t.madeIn}
+      </p>
+      <p>{t.disclaimer}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    z-index: 0;
+    background: var(--color-primary-dark);
+    color: #fff;
+    overflow: hidden;
+  }
+
+  /* Revelado desde atrás: solo con JS y si el footer cabe en la pantalla */
+  :global(html.js.footer-reveal) .site-footer {
+    position: fixed;
+    inset: auto 0 0;
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .footer-inner {
+    padding-top: clamp(4rem, 3rem + 4vw, 7rem);
+    will-change: transform;
+  }
+
+  .footer-top {
+    display: grid;
+    gap: 3.5rem;
+  }
+
+  @media (min-width: 960px) {
+    .footer-top {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .footer-title {
+    font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .footer-lead {
+    margin-top: 1.25rem;
+    max-width: 26rem;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  .footer-cols {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem 2rem;
+  }
+
+  @media (min-width: 640px) {
+    .footer-cols {
+      grid-template-columns: repeat(3, auto);
+      justify-content: end;
+      gap: 3.5rem;
+    }
+  }
+
+  .footer-col-title {
+    margin-bottom: 1rem;
+    font-size: 0.9375rem;
+    color: rgb(255 255 255 / 0.55);
+  }
+
+  .footer-cols ul {
+    display: grid;
+    gap: 0.625rem;
+  }
+
+  .footer-link {
+    font-size: 1.0625rem;
+    color: #fff;
+    text-align: left;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 350ms var(--ease-out-expo);
+  }
+
+  .footer-link:hover {
+    background-size: 100% 1px;
+  }
+
+  .claims {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 12px;
+    background: rgb(255 255 255 / 0.08);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: background-color 200ms var(--ease-out-expo);
+  }
+
+  .claims:hover {
+    background: rgb(255 255 255 / 0.14);
+  }
+
+  .footer-mark {
+    margin-top: clamp(4rem, 3rem + 5vw, 8rem);
+    color: var(--color-primary);
+  }
+
+  .footer-mark :global(.footer-logo) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 2rem 1.5rem;
+    font-size: 0.875rem;
+    color: rgb(255 255 255 / 0.6);
+  }
+</style>

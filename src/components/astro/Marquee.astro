@@ -1,0 +1,56 @@
+---
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+<div class="marquee" data-marquee aria-label={text} role="img">
+  <div class="marquee-track" data-marquee-track aria-hidden="true">
+    {Array.from({ length: 4 }, () => (
+      <span class="marquee-item">
+        {text}
+        <svg viewBox="0 0 512 512" class="marquee-mark" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M289.477 475.569C190.706 493.087 91.9878 444.497 45.6241 355.542C-0.739746 266.586 15.9709 157.835 86.9027 86.9028C157.835 15.9709 266.586 -0.739714 355.542 45.6241C444.497 91.9879 493.087 190.706 475.569 289.477C465.395 347.569 472.615 420.103 485.744 472.615C433.231 459.487 347.569 465.395 289.477 475.569ZM168.173 414.615C211.385 437.591 285.737 382.264 334.243 291.038C382.748 199.812 387.04 107.233 343.827 84.2568C300.615 61.2804 226.263 116.608 177.757 207.834C129.252 299.059 124.96 391.639 168.173 414.615Z"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    padding-block: 1.5rem;
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding-right: 0.4em;
+    font-size: clamp(3rem, 1.6rem + 6vw, 8rem);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .marquee-mark {
+    width: 0.7em;
+    height: 0.7em;
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+import type { Detail } from '@/data/product';
+
+interface Props {
+  title: string;
+  details: Detail[];
+  dark?: boolean;
+}
+
+const { title, details, dark = false } = Astro.props;
+---
+
+<section class:list={['detail-grid', { dark }]}>
+  <div class="wrap">
+    <h2 class="block-title" data-split>
+      {title}
+    </h2>
+    <ul class="details" data-reveal-group>
+      {details.map((d) => (
+        <li class="detail" data-reveal>
+          <h3 class="detail-title">{d.title}</h3>
+          <p class="detail-text">{d.text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .detail-grid {
+    padding-block: clamp(6rem, 4rem + 6vw, 10rem);
+    background: var(--color-paper-deep);
+  }
+
+  .detail-grid.dark {
+    background: #0b120d;
+    color: #f2f5f2;
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .block-title {
+    max-width: 18ch;
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .details {
+    display: grid;
+    gap: 3rem 2.5rem;
+    margin-top: clamp(3rem, 2rem + 3vw, 5rem);
+  }
+
+  @media (min-width: 640px) {
+    .details {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .details {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .detail-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .detail-text {
+    margin-top: 0.625rem;
+    max-width: 24rem;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+  }
+
+  .dark .detail-text {
+    color: rgb(242 245 242 / 0.72);
+  }
+</style>

@@ -1,0 +1,105 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const date = post.data.pubDate.toLocaleDateString('es-PE', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout title={`${post.data.title} · Quina`} description={post.data.description}>
+  <article class="article">
+    <header class="article-head" data-reveal-group>
+      <a href="/blog" class="back" data-reveal>
+        Blog
+      </a>
+      <h1 class="article-title" data-split>
+        {post.data.title}
+      </h1>
+      <p class="article-meta" data-reveal>
+        {post.data.author} · <time datetime={post.data.pubDate.toISOString()}>{date}</time>
+      </p>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .article {
+    width: min(100% - 2.5rem, 46rem);
+    margin-inline: auto;
+    padding-block: clamp(4rem, 3rem + 4vw, 7rem) clamp(5rem, 4rem + 4vw, 8rem);
+  }
+
+  .back {
+    font-weight: 600;
+    color: var(--color-link-active);
+  }
+
+  .article-title {
+    margin-top: 1.25rem;
+    font-size: clamp(2.25rem, 1.5rem + 3vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .article-meta {
+    margin-top: 1.25rem;
+    color: var(--color-ink-soft);
+  }
+
+  .prose {
+    margin-top: 3rem;
+    font-size: 1.1875rem;
+    line-height: 1.7;
+  }
+
+  .prose :global(p + p),
+  .prose :global(ol),
+  .prose :global(ul) {
+    margin-top: 1.25rem;
+  }
+
+  .prose :global(h2) {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .prose :global(ol) {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+
+  .prose :global(ul) {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.5rem;
+  }
+
+  .prose :global(strong) {
+    font-weight: 700;
+  }
+</style>

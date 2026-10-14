@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/astro/page/PageHero.astro';
+import Calculator from '@/components/astro/Calculator.astro';
+import DetailGrid from '@/components/astro/page/DetailGrid.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
+
+const how = [
+  {
+    title: 'Plata en la calle',
+    text: 'Vecinos a los que les fías por lo que debe cada uno en promedio.',
+  },
+  {
+    title: 'Lo que se te escapa',
+    text: 'La parte de esa plata que cada mes se olvida o llega tarde.',
+  },
+  {
+    title: 'Cuándo se paga Pro',
+    text: 'Dividimos S/ 29 entre lo que se te escapa: es lo mínimo que necesitas recuperar.',
+  },
+];
+---
+
+<BaseLayout
+  title="Calculadora de fiado · Quina"
+  description="Calcula cuánta plata tienes en la calle por el fiado de tu negocio y cuánto se te escapa cada mes."
+>
+  <PageHero
+    crumb={{ label: 'Recursos' }}
+    title="¿Cuánta plata tienes en la calle?"
+    lead="Mueve los números con los de tu negocio. La cuenta se hace en tu celular y no guardamos nada."
+  />
+  <Calculator heading={false} />
+  <DetailGrid title="Cómo se calcula" details={how} />
+  <CtaBand />
+</BaseLayout>

@@ -1,0 +1,228 @@
+---
+import PlanSelector from '@/components/react/PlanSelector';
+import { site } from '@/data/site';
+import { home } from '@/i18n/home';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  heading?: boolean;
+  lang?: Lang;
+}
+
+const { heading = true, lang = 'es' } = Astro.props;
+const c = home[lang].pricing;
+---
+
+<section
+  id={{ es: 'precios', en: 'pricing', qu: 'chaninkuna' }[lang]}
+  class="pricing"
+  aria-label={c.title}
+>
+  <div class="wrap">
+    {heading && (
+      <div class="pricing-head" data-reveal-group>
+        <h2 class="pricing-title" data-split>
+          {c.title}
+        </h2>
+        <p class="pricing-lead" data-reveal>
+          {c.lead}
+        </p>
+      </div>
+    )}
+    <div data-reveal-group>
+      <div data-reveal>
+        <PlanSelector client:visible signupUrl={site.appSignupUrl} lang={lang} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pricing {
+    padding-block: clamp(7rem, 5rem + 8vw, 12rem);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .pricing-head {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: center;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .pricing-title {
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .pricing-lead {
+    max-width: 34rem;
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+  }
+
+  :global(.plans) {
+    display: grid;
+    justify-items: center;
+    gap: 2.5rem;
+  }
+
+  :global(.plans-toggle) {
+    display: inline-flex;
+    padding: 0.3rem;
+    border-radius: 9999px;
+    background: var(--color-paper-deep);
+  }
+
+  :global(.plans-toggle button) {
+    height: 2.75rem;
+    padding-inline: 1.25rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--color-ink-soft);
+    transition:
+      background-color 250ms var(--ease-out-expo),
+      color 250ms var(--ease-out-expo);
+  }
+
+  :global(.plans-toggle button.is-active) {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: 0 1px 3px rgb(15 26 19 / 0.12);
+  }
+
+  :global(.plans-grid) {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  @media (min-width: 960px) {
+    :global(.plans-grid) {
+      grid-template-columns: repeat(3, 1fr);
+      align-items: start;
+    }
+  }
+
+  :global(.plan) {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    border-radius: 24px;
+    background: var(--color-surface);
+  }
+
+  :global(.plan.is-featured) {
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  :global(.plan-name) {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  :global(.plan-pitch) {
+    margin-top: 0.375rem;
+    color: var(--color-ink-soft);
+  }
+
+  :global(.is-featured .plan-pitch),
+  :global(.is-featured .plan-billing),
+  :global(.is-featured .plan-period) {
+    color: rgb(255 255 255 / 0.72);
+  }
+
+  :global(.plan-price) {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  :global(.plan-amount) {
+    font-size: clamp(2.75rem, 2rem + 2vw, 3.75rem);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :global(.is-featured .plan-amount) {
+    color: var(--color-primary);
+  }
+
+  :global(.plan-period) {
+    color: var(--color-ink-soft);
+  }
+
+  :global(.plan-billing) {
+    margin-top: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--color-ink-soft);
+  }
+
+  :global(.plan-cta) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 3.25rem;
+    margin-top: 1.75rem;
+    border-radius: 9999px;
+    background: var(--color-paper-deep);
+    color: var(--color-ink);
+    font-weight: 600;
+    transition:
+      background-color 200ms var(--ease-out-expo),
+      scale 160ms var(--ease-out-expo);
+  }
+
+  :global(.plan-cta:hover) {
+    background: var(--color-surface-hover);
+  }
+
+  :global(.plan-cta:active) {
+    scale: 0.98;
+  }
+
+  :global(.is-featured .plan-cta) {
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  :global(.is-featured .plan-cta:hover) {
+    background: #24c65a;
+  }
+
+  :global(.plan-features) {
+    display: grid;
+    gap: 0.875rem;
+    margin-top: 2rem;
+  }
+
+  :global(.plan-features li) {
+    display: flex;
+    gap: 0.625rem;
+    line-height: 1.4;
+  }
+
+  :global(.plan-features svg) {
+    flex: none;
+    margin-top: 1px;
+    color: var(--color-success);
+  }
+
+  :global(.is-featured .plan-features svg) {
+    color: var(--color-primary);
+  }
+</style>

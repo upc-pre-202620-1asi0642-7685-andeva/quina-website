@@ -1,0 +1,107 @@
+---
+/**
+ * Botón/enlace con efecto imán (data-magnetic). El script de animaciones
+ * mueve el botón y su contenido hacia el cursor con fuerzas distintas.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'> & {
+  href: string;
+  variant?: 'primary' | 'dark' | 'light' | 'ghost';
+  size?: 'md' | 'lg';
+  magnetic?: boolean;
+};
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  magnetic = true,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={['btn', `btn-${variant}`, `btn-${size}`, className]}
+  data-magnetic={magnetic ? '' : undefined}
+  {...rest}
+>
+  <span class="btn-inner" data-magnetic-inner>
+    <slot />
+  </span>
+</a>
+
+<style>
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+      background-color 200ms var(--ease-out-expo),
+      color 200ms var(--ease-out-expo),
+      scale 160ms var(--ease-out-expo);
+    will-change: transform;
+  }
+
+  .btn:active {
+    scale: 0.97;
+  }
+
+  .btn-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .btn-md {
+    height: 2.75rem;
+    padding-inline: 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .btn-lg {
+    height: 3.5rem;
+    padding-inline: 1.75rem;
+    font-size: 1.0625rem;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+  .btn-primary:hover {
+    background: #24c65a;
+  }
+
+  .btn-dark {
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+  .btn-dark:hover {
+    background: #12462a;
+  }
+
+  /* Siempre blanco con tinta oscura: se usa sobre fotos y fondos de color en ambos temas */
+  .btn-light {
+    background: #fff;
+    color: #0f1a13;
+  }
+  .btn-light:hover {
+    background: var(--color-primary-soft);
+  }
+
+  .btn-ghost {
+    background: rgb(255 255 255 / 0.14);
+    color: inherit;
+  }
+  .btn-ghost:hover {
+    background: rgb(255 255 255 / 0.24);
+  }
+</style>

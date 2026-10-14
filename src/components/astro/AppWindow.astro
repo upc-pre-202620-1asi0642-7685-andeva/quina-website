@@ -1,0 +1,306 @@
+---
+/**
+ * Fragmento de la interfaz real de la webapp de Quina, maquetado en HTML.
+ * data-ui marca que es interfaz de producto (sus bordes y tablas son propios).
+ */
+const purchases = [
+  { date: '28 oct', item: 'Arroz Costeño 5 kg', qty: 1, amount: 22.5 },
+  { date: '27 oct', item: 'Leche Gloria azul x6', qty: 1, amount: 24.6 },
+  { date: '25 oct', item: 'Aceite Primor 1 L', qty: 2, amount: 23.8 },
+  { date: '22 oct', item: 'Azúcar rubia 1 kg', qty: 2, amount: 9.4 },
+  { date: '19 oct', item: 'Pan francés', qty: 10, amount: 3.0 },
+  { date: '16 oct', item: 'Detergente Bolívar 900 g', qty: 1, amount: 12.9 },
+];
+
+const soles = (n: number) =>
+  'S/ ' + n.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const sidebar = ['Inicio', 'Vender', 'Clientes', 'Créditos', 'Inventario', 'Reportes'];
+---
+
+<div class="app" data-ui aria-hidden="true">
+  <div class="app-chrome">
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="app-url">app.quina.andeva.tech/clientes/rosa-quispe</span>
+  </div>
+
+  <div class="app-body">
+    <aside class="app-side">
+      <div class="app-store">
+        <span class="store-avatar">DL</span>
+        <span>
+          <strong>Bodega Don Lucho</strong>
+          <small>San Martín de Porres</small>
+        </span>
+      </div>
+      <ul>
+        {sidebar.map((s) => (
+          <li class:list={{ active: s === 'Clientes' }}>{s}</li>
+        ))}
+      </ul>
+    </aside>
+
+    <main class="app-main">
+      <div class="app-head">
+        <div>
+          <p class="app-crumb">Clientes / Rosa Quispe</p>
+          <h3 class="app-title">Rosa Quispe Huamán</h3>
+        </div>
+        <span class="badge">Al día</span>
+      </div>
+
+      <div class="app-kpis">
+        <div class="kpi">
+          <small>Saldo del ciclo</small>
+          <strong>{soles(186.4)}</strong>
+        </div>
+        <div class="kpi">
+          <small>Límite disponible</small>
+          <strong>{soles(113.6)}</strong>
+          <span class="bar">
+            <span style="width: 62%"></span>
+          </span>
+        </div>
+        <div class="kpi">
+          <small>Fecha de corte</small>
+          <strong>30 oct</strong>
+        </div>
+        <div class="kpi">
+          <small>Fecha de pago</small>
+          <strong>5 nov</strong>
+        </div>
+      </div>
+
+      <table class="app-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Cant.</th>
+            <th class="r">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {purchases.map((p) => (
+            <tr>
+              <td>{p.date}</td>
+              <td>{p.item}</td>
+              <td>{p.qty}</td>
+              <td class="r">{soles(p.amount)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </main>
+  </div>
+</div>
+
+<style>
+  .app {
+    width: 100%;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    color: #262626;
+    font-size: 13px;
+    box-shadow:
+      0 2px 4px rgb(10 46 23 / 0.06),
+      0 30px 80px -20px rgb(10 46 23 / 0.35);
+  }
+
+  .app-chrome {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding-inline: 14px;
+    background: #f3f4f1;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #d6d9d3;
+  }
+
+  .app-url {
+    margin-left: 14px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: #fff;
+    color: #6b746d;
+    font-size: 12px;
+  }
+
+  .app-body {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    min-height: 420px;
+  }
+
+  .app-side {
+    padding: 18px 12px;
+    background: #fafbf9;
+    border-right: 1px solid #ebebeb;
+  }
+
+  .app-store {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 8px 18px;
+  }
+
+  .app-store strong {
+    display: block;
+    font-size: 13px;
+  }
+
+  .app-store small {
+    color: #5f6862;
+    font-size: 11px;
+  }
+
+  .store-avatar {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .app-side li {
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: #4f5a52;
+    font-weight: 500;
+  }
+
+  .app-side li.active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+  }
+
+  .app-main {
+    padding: 22px 26px;
+  }
+
+  .app-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .app-crumb {
+    color: #5f6862;
+    font-size: 12px;
+  }
+
+  .app-title {
+    margin-top: 2px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .app-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .kpi {
+    padding: 12px 14px;
+    border: 1px solid #ebebeb;
+    border-radius: 12px;
+  }
+
+  .kpi small {
+    display: block;
+    color: #5f6862;
+    font-size: 11px;
+  }
+
+  .kpi strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi .bar {
+    display: block;
+    height: 4px;
+    margin-top: 8px;
+    border-radius: 4px;
+    background: #eef0ec;
+    overflow: hidden;
+  }
+
+  .kpi .bar span {
+    display: block;
+    height: 100%;
+    background: var(--color-primary);
+  }
+
+  .app-table {
+    width: 100%;
+    margin-top: 18px;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .app-table th {
+    padding: 8px 6px;
+    text-align: left;
+    color: #5f6862;
+    font-weight: 500;
+    font-size: 11px;
+    border-bottom: 1px solid #ebebeb;
+  }
+
+  .app-table td {
+    padding: 9px 6px;
+    border-bottom: 1px solid #f3f4f1;
+  }
+
+  .app-table .r {
+    text-align: right;
+  }
+
+  @media (max-width: 767px) {
+    .app-body {
+      grid-template-columns: 1fr;
+    }
+    .app-side {
+      display: none;
+    }
+    .app-kpis {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .app-main {
+      padding: 16px;
+    }
+    .app-url {
+      display: none;
+    }
+  }
+</style>
