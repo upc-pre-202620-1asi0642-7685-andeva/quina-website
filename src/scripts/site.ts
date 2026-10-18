@@ -275,7 +275,14 @@ function initMagnetic() {
 function initHero() {
   // La ventana del producto y sus tarjetas tienen su propia secuencia en HeroShowcase.astro
   const fades = gsap.utils.toArray<HTMLElement>('[data-hero-fade]');
-  gsap.from(fades, { autoAlpha: 0, y: 24, duration: 1, stagger: 0.09, ease: 'expo.out', delay: 0.7 });
+  gsap.from(fades, {
+    autoAlpha: 0,
+    y: 24,
+    duration: 1,
+    stagger: 0.09,
+    ease: 'expo.out',
+    delay: 0.7,
+  });
 }
 
 /* ---------------------------------------------------------------------------
@@ -409,6 +416,60 @@ function initTilt() {
 }
 
 /* ---------------------------------------------------------------------------
+   Sticky scroll reveal: el texto avanza y el dispositivo fijo cambia de pantalla
+   Solo en escritorio; en móvil cada paso lleva su propio dispositivo.
+   --------------------------------------------------------------------------- */
+
+function initStickyReveal() {
+  document.querySelectorAll<HTMLElement>('[data-sticky-reveal]').forEach((root) => {
+    const steps = [...root.querySelectorAll<HTMLElement>('[data-sticky-step]')];
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-sticky-slide]')];
+    const labels = [...root.querySelectorAll<HTMLElement>('[data-sticky-label]')];
+    const bars = [...root.querySelectorAll<HTMLElement>('[data-sticky-bar]')];
+    const device = root.querySelector<HTMLElement>('[data-sticky-device] > *');
+
+    const setActive = (index: number) => {
+      [steps, slides, labels].forEach((list) =>
+        list.forEach((el, i) => el.classList.toggle('is-active', i === index)),
+      );
+      // Sin movimiento las barras no siguen el scroll: se llenan al llegar a cada paso
+      if (reduced) bars.forEach((bar, i) => gsap.set(bar, { scaleX: i <= index ? 1 : 0 }));
+    };
+
+    gsap.matchMedia().add('(min-width: 900px)', () => {
+      setActive(0);
+      steps.forEach((step, i) => {
+        ScrollTrigger.create({
+          trigger: step,
+          start: 'top center',
+          end: 'bottom center',
+          onToggle: (self) => self.isActive && setActive(i),
+          ...(reduced
+            ? {}
+            : { onUpdate: (self) => gsap.set(bars[i] ?? [], { scaleX: self.progress }) }),
+        });
+      });
+
+      // El dispositivo se endereza al entrar, igual que los de las demás secciones
+      if (device && !reduced) {
+        gsap.fromTo(
+          device,
+          { rotateY: -20, rotateX: 14, rotateZ: -4, scale: 0.9 },
+          {
+            rotateY: -5,
+            rotateX: 3,
+            rotateZ: -1,
+            scale: 1,
+            ease: 'none',
+            scrollTrigger: { trigger: root, start: 'top bottom', end: 'top 15%', scrub: 0.6 },
+          },
+        );
+      }
+    });
+  });
+}
+
+/* ---------------------------------------------------------------------------
    Video que crece hasta casi llenar la pantalla (Viora)
    --------------------------------------------------------------------------- */
 
@@ -516,6 +577,7 @@ initHeader();
 initDropdowns();
 initLanguageCookie();
 initFooterReveal();
+initStickyReveal();
 
 if (reduced) {
   document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
