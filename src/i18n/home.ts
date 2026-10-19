@@ -149,6 +149,25 @@ export const home = {
         },
       ],
     },
+    devices: {
+      id: 'donde-usarla',
+      title: 'Hecho para tu mostrador',
+      lead: 'Quina va donde tú estás: en el celular mientras atiendes y en la compu cuando cierras.',
+      items: [
+        {
+          title: 'En la compu',
+          text: 'Cuando cierras, revisas cortes, reportes y stock con calma y en pantalla grande.',
+        },
+        { title: 'En el celular', text: 'Fías en tres toques mientras atiendes la cola.' },
+        {
+          title: 'En tu pantalla de inicio',
+          text: 'La agregas desde el navegador, como una app. Sin tienda de apps.',
+        },
+      ],
+      url: 'quina.andeva.tech',
+      install: 'Agregar a inicio',
+      note: 'En Bodega Pro, hasta 3 personas de tu tienda con su propio acceso.',
+    },
     calc: {
       title: '¿Cuánta plata tienes en la calle?',
       lead: 'Mueve los números con los de tu negocio. La cuenta es tuya, no la guardamos.',
@@ -158,6 +177,13 @@ export const home = {
       lead: 'Tus vecinos nunca pagan nada. Una sola deuda de S/ 30 que recuperes ya paga el mes de Bodega Pro.',
     },
     faqTitle: 'Lo que nos preguntan los caseros',
+    cta: {
+      title: 'Deja el cuaderno este mes',
+      text: 'Pasa tus fiados a Quina en una tarde: cada vecino con su límite, su fecha de pago y su recordatorio.',
+      primary: 'Empieza gratis hoy',
+      secondary: 'Ver planes',
+      secondaryHref: '/planes',
+    },
   },
   en: {
     meta: {
@@ -301,6 +327,28 @@ export const home = {
         },
       ],
     },
+    devices: {
+      id: 'where-to-use',
+      title: 'Made for your counter',
+      lead: 'Quina goes where you are: on your phone while you serve customers and on the computer after closing.',
+      items: [
+        {
+          title: 'On the computer',
+          text: 'After closing, review statements, reports and stock calmly on a big screen.',
+        },
+        {
+          title: 'On your phone',
+          text: 'Record credit sales in three taps while you serve the line.',
+        },
+        {
+          title: 'On your home screen',
+          text: 'Add it from the browser, like an app. No app store needed.',
+        },
+      ],
+      url: 'quina.andeva.tech',
+      install: 'Add to home',
+      note: 'On Bodega Pro, up to 3 people from your shop, each with their own login.',
+    },
     calc: {
       title: 'How much money is out on credit?',
       lead: 'Use your own shop’s numbers. The math stays on your device.',
@@ -310,6 +358,14 @@ export const home = {
       lead: 'Neighbors never pay anything. Recovering a single S/ 30 debt already covers a month of Bodega Pro.',
     },
     faqTitle: 'What shop owners ask us',
+    cta: {
+      title: 'Retire the notebook this month',
+      text: 'Move your credit book to Quina in one afternoon: every customer with a limit, a due date and a reminder.',
+      primary: 'Start free today',
+      secondary: 'See plans',
+      // La página de planes solo existe en castellano: lleva a los precios de la portada
+      secondaryHref: '/en/#pricing',
+    },
   },
   // Borrador en quechua sureño: requiere revisión de un traductor nativo antes de publicar.
   qu: {
@@ -460,6 +516,25 @@ export const home = {
         },
       ],
     },
+    devices: {
+      id: 'maypi',
+      title: 'Mostradorniykipaq ruwasqa',
+      lead: 'Quinaqa maypichus kanki chaypim: celularpi atiendespa, computadorapi wichqaspa.',
+      items: [
+        {
+          title: 'Computadorapi',
+          text: 'Wichqaspa, cortekunata, reportekunata, stocktapas hatun pantallapi hawkalla qhawanki.',
+        },
+        { title: 'Celularpi', text: 'Kimsa toqellapi manukuyta qillqanki, colata atiendespa.' },
+        {
+          title: 'Pantalla de inicioykipi',
+          text: 'Navegadormanta app hina yapanki. Mana app tiendayuq.',
+        },
+      ],
+      url: 'quina.andeva.tech',
+      install: 'Inicioman yapay',
+      note: 'Bodega Pro nisqapi, tiendaykimanta 3 runakama, sapanka accesonwan.',
+    },
     calc: {
       title: '¿Hayk’a qullqiykitaq callepi kachkan?',
       lead: 'Negocioykipa yupayninkunawan kuyuchiy. Yupayqa celularniykillapim, manam waqaychanchikchu.',
@@ -469,6 +544,13 @@ export const home = {
       lead: 'Vecinoykikunaqa manam imatapas paganqakuchu. Huk S/ 30 manuta kutichiptiykiqa, Bodega Proqa huk killapaq pagasqañam.',
     },
     faqTitle: 'Caserokunapa tapukuyninkuna',
+    cta: {
+      title: 'Kay killapi cuadernota saqiy',
+      text: 'Huk sukhayllapi manukunata Quinaman apay: sapa vecinopaq límite, pagana p’unchaw, yuyarichiypas.',
+      primary: 'Kunanmanta gratis qallariy',
+      secondary: 'Chaninkunata qhaway',
+      secondaryHref: '/qu/#chaninkuna',
+    },
   },
 } as const;
 

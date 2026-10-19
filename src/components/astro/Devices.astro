@@ -1,0 +1,661 @@
+---
+/**
+ * "Hecho para tu mostrador": en qué se usa Quina (21st.dev download-options,
+ * llevado a Astro y al sistema de Quina). Tarjeta principal con la compu y el
+ * único CTA de la sección (registro); a la derecha, el celular y la pantalla de
+ * inicio, sin botones. Cada dispositivo está maquetado en HTML y flota suave.
+ * Responde la objeción de no tener tiempo para una computadora mientras se
+ * atiende (docs/product-marketing.md).
+ */
+import Users from '@lucide/astro/icons/users';
+import Button from './Button.astro';
+import Logo from './Logo.astro';
+import { home } from '@/i18n/home';
+import { appLinks, ui, type Lang } from '@/i18n/ui';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = 'es' } = Astro.props;
+const c = home[lang].devices;
+const hero = home[lang].hero;
+const t = ui[lang];
+const [computer, phone, homeScreen] = c.items;
+---
+
+<section id={c.id} class="devices" aria-labelledby="devices-title">
+  <div class="wrap devices-head" data-reveal-group>
+    <h2 id="devices-title" class="devices-title" data-split>
+      {c.title}
+    </h2>
+    <p class="devices-lead" data-reveal>
+      {c.lead}
+    </p>
+  </div>
+
+  <div class="wrap" data-reveal-group>
+    <ul class="cards">
+      <li class="card card-main" data-reveal>
+        <h3 class="card-title">{computer!.title}</h3>
+        <p class="card-text">{computer!.text}</p>
+        <div class="card-visual" aria-hidden="true">
+          <!-- Laptop con la ficha del vecino, en miniatura y ampliada -->
+          <div class="laptop-scale">
+            <div class="laptop">
+              <div class="laptop-screen" data-ui>
+                <span class="lap-side">
+                  <i></i>
+                  <i class="is-active"></i>
+                  <i></i>
+                  <i></i>
+                </span>
+                <span class="lap-main">
+                  <span class="lap-name">Rosa Quispe</span>
+                  <span class="lap-kpis">
+                    <span>
+                      <small></small>S/ 186.40
+                    </span>
+                    <span>
+                      <small></small>S/ 113.60
+                    </span>
+                    <span>
+                      <small></small>5 nov
+                    </span>
+                  </span>
+                  <span class="lap-rows">
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                  </span>
+                </span>
+              </div>
+              <div class="laptop-base"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <Button href={appLinks.signup} size="lg">
+            {t.signup}
+            <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
+              <path
+                d="M5 12h14m-6-6 6 6-6 6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </Button>
+        </div>
+      </li>
+
+      <li class="card" data-reveal>
+        <h3 class="card-title">{phone!.title}</h3>
+        <p class="card-text">{phone!.text}</p>
+        <div class="card-visual" aria-hidden="true">
+          <!-- Celular con la venta al fiado que también cuenta el hero -->
+          <div class="phone" data-ui>
+            <div class="phone-screen">
+              <p class="ui-kicker">{hero.sale}</p>
+              <p class="ui-who">
+                <span class="ui-avatar">RQ</span>Rosa Quispe
+              </p>
+              <ul class="ui-items">
+                {hero.saleItems.map(([name, price]) => (
+                  <li>
+                    <span>{name}</span>
+                    <span>{price}</span>
+                  </li>
+                ))}
+              </ul>
+              <p class="ui-muted">{hero.saleLimit}</p>
+              <span class="ui-bar">
+                <span></span>
+              </span>
+              <p class="ui-ok">{hero.saleOk}</p>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="card" data-reveal>
+        <h3 class="card-title">{homeScreen!.title}</h3>
+        <p class="card-text">{homeScreen!.text}</p>
+        <div class="card-visual" aria-hidden="true">
+          <!-- Del navegador a la pantalla de inicio: Quina queda como un ícono más -->
+          <div class="install">
+            <div class="browser-bar" data-ui>
+              <span class="browser-url">
+                <svg viewBox="0 0 24 24" class="lock">
+                  <rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"></rect>
+                  <path
+                    d="M8 11V8a4 4 0 0 1 8 0v3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.25"
+                  ></path>
+                </svg>
+                {c.url}
+              </span>
+              <span class="browser-install">+ {c.install}</span>
+            </div>
+            <span class="home-grid">
+              {Array.from({ length: 8 }, (_, i) =>
+                i === 5 ? (
+                  <span class="home-app home-quina">
+                    <Logo variant="isotipo" title="" class="home-quina-logo" />
+                  </span>
+                ) : (
+                  <span class="home-app" />
+                ),
+              )}
+            </span>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <p class="devices-note" data-reveal>
+      <Users class="note-icon" aria-hidden="true" />
+      {c.note}
+    </p>
+  </div>
+</section>
+
+<style>
+  .devices {
+    padding-block: clamp(6rem, 4rem + 6vw, 10rem);
+  }
+
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .devices-head {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .devices-title {
+    font-size: var(--text-headline);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+
+  .devices-lead {
+    max-width: 36rem;
+    font-size: 1.125rem;
+    color: var(--color-ink-soft);
+  }
+
+  /* ---- Tarjetas (mismo radio y superficie que las de planes) ---- */
+
+  .cards {
+    display: grid;
+    gap: 1rem;
+    margin-top: clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+
+  /* Escritorio: la compu ocupa la columna izquierda; celular e inicio, apilados a la derecha */
+  @media (min-width: 900px) {
+    .cards {
+      grid-template-columns: 1.25fr 1fr;
+    }
+
+    .card-main {
+      grid-row: span 2;
+    }
+  }
+
+  .card {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1.5rem 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 24px;
+    background: var(--color-surface);
+    text-align: center;
+    transition: border-color 300ms var(--ease-out-expo);
+  }
+
+  /* Trama de líneas nítida (en lugar de un halo difuso) que se desvanece hacia los bordes */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(var(--color-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: center;
+    mask-image: radial-gradient(70% 55% at 50% 60%, #000 20%, transparent 75%);
+  }
+
+  @media (hover: hover) {
+    .card:hover {
+      border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+    }
+
+    /* Una sola regla que multiplica la escala base: con el scope de Astro, una regla
+       aparte para la laptop pierde en especificidad y la deja en 1.05 (se achica) */
+    .card:hover .card-visual > * {
+      scale: calc(var(--laptop-scale, 1) * 1.05);
+    }
+  }
+
+  .card-actions {
+    padding-top: 1.5rem;
+  }
+
+  /* La tarjeta principal crece con la columna derecha: su escenario toma el alto libre */
+  .card-main .card-visual {
+    flex: 1;
+    min-height: 15rem;
+  }
+
+  /* La laptop se maqueta pequeña y se amplía entera: así no hay que reescalar cada medida */
+  .laptop-scale {
+    --laptop-scale: 1.15;
+    scale: var(--laptop-scale);
+  }
+
+  @media (min-width: 600px) {
+    .laptop-scale {
+      --laptop-scale: 1.5;
+    }
+    .card-main .card-visual {
+      min-height: 20rem;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .laptop-scale {
+      --laptop-scale: 2.2;
+    }
+  }
+
+  .card-title {
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .card-text {
+    max-width: 22rem;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--color-ink-soft);
+  }
+
+  /* Escenario del dispositivo: flota suave (translate y scale no pisan el giro 3D) */
+  .card-visual {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 15rem;
+    margin-top: 1rem;
+    perspective: 900px;
+  }
+
+  .card-visual > * {
+    animation: devices-float 4s ease-in-out infinite;
+    transition: scale 300ms var(--ease-out-expo);
+  }
+
+  .card:nth-child(2) .card-visual > * {
+    animation-delay: -1.3s;
+  }
+
+  .card:nth-child(3) .card-visual > * {
+    animation-delay: -2.6s;
+  }
+
+  @keyframes devices-float {
+    50% {
+      translate: 0 -8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-visual > * {
+      animation: none;
+      transition: none;
+    }
+  }
+
+  /* ---- Interfaz en miniatura (siempre clara: es producto) ---- */
+
+  [data-ui] {
+    color: #262626;
+  }
+
+  .ui-kicker,
+  .ui-muted {
+    color: #5f6862;
+  }
+
+  .ui-kicker {
+    font-weight: 600;
+  }
+
+  .ui-who {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+    font-weight: 700;
+  }
+
+  .ui-avatar {
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-size: 0.375rem;
+  }
+
+  .ui-items {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.4rem;
+  }
+
+  .ui-items li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.25rem;
+    padding: 0.25rem 0.35rem;
+    border-radius: 0.3rem;
+    background: #f6f7f5;
+  }
+
+  .ui-muted {
+    margin-top: 0.5rem;
+  }
+
+  .ui-bar {
+    display: block;
+    height: 0.25rem;
+    margin-top: 0.25rem;
+    border-radius: 1rem;
+    background: #eef0ec;
+    overflow: hidden;
+  }
+
+  .ui-bar span {
+    display: block;
+    width: 38%;
+    height: 100%;
+    background: var(--color-primary);
+  }
+
+  .ui-ok {
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.35rem;
+    border-radius: 0.35rem;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+  }
+
+  /* ---- Celular ---- */
+
+  .phone {
+    width: 7.5rem;
+    aspect-ratio: 9 / 17.5;
+    padding: 0.3rem;
+    border-radius: 1.5rem;
+    background: #141716;
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.12),
+      0 30px 50px -20px rgb(10 46 23 / 0.45);
+    transform: rotateY(-20deg) rotateX(10deg) rotate(-9deg);
+  }
+
+  .phone-screen {
+    position: relative;
+    height: 100%;
+    padding: 1.3rem 0.45rem 0.45rem;
+    border-radius: 1.25rem;
+    background: #fff;
+    font-size: 0.4375rem;
+    line-height: 1.3;
+    text-align: left;
+  }
+
+  /* Isla de la cámara */
+  .phone-screen::before {
+    content: '';
+    position: absolute;
+    top: 0.4rem;
+    left: 50%;
+    width: 2.25rem;
+    height: 0.55rem;
+    border-radius: 1rem;
+    background: #141716;
+    translate: -50% 0;
+  }
+
+  /* ---- Laptop ---- */
+
+  .laptop {
+    width: 15.5rem;
+    transform: rotateY(18deg) rotateX(8deg);
+    filter: drop-shadow(0 26px 30px rgb(10 46 23 / 0.3));
+  }
+
+  .laptop-screen {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border: 0.4rem solid #141716;
+    border-bottom-width: 0.55rem;
+    border-radius: 0.6rem 0.6rem 0 0;
+    background: #fff;
+  }
+
+  .lap-side {
+    display: grid;
+    align-content: start;
+    gap: 0.3rem;
+    padding: 0.6rem 0.35rem;
+    background: #fafbf9;
+    border-right: 1px solid #ebebeb;
+  }
+
+  .lap-side i {
+    height: 0.3rem;
+    border-radius: 1rem;
+    background: #e3e6e1;
+  }
+
+  .lap-side i.is-active {
+    background: var(--color-primary);
+  }
+
+  .lap-main {
+    display: grid;
+    align-content: start;
+    gap: 0.45rem;
+    padding: 0.55rem;
+    font-size: 0.5rem;
+    text-align: left;
+  }
+
+  .lap-name {
+    font-weight: 700;
+    font-size: 0.625rem;
+  }
+
+  .lap-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+  }
+
+  .lap-kpis span {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.3rem;
+    border: 1px solid #ebebeb;
+    border-radius: 0.3rem;
+    font-weight: 700;
+  }
+
+  .lap-kpis small {
+    width: 70%;
+    height: 0.2rem;
+    border-radius: 1rem;
+    background: #e3e6e1;
+  }
+
+  .lap-rows {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .lap-rows i {
+    height: 0.4rem;
+    border-radius: 0.2rem;
+    background: #f3f4f1;
+  }
+
+  .laptop-base {
+    position: relative;
+    width: 116%;
+    height: 0.6rem;
+    margin-left: -8%;
+    border-radius: 0.1rem 0.1rem 0.6rem 0.6rem;
+    background: linear-gradient(#d6d9d3, #a9ada6);
+  }
+
+  .laptop-base::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: 0 0 0.3rem 0.3rem;
+    background: #9da19a;
+    translate: -50% 0;
+  }
+
+  /* ---- Navegador → pantalla de inicio ---- */
+
+  .install {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+  }
+
+  .browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem;
+    border-radius: 9999px;
+    background: #fff;
+    font-size: 0.6875rem;
+    box-shadow: 0 10px 24px -12px rgb(10 46 23 / 0.45);
+  }
+
+  .browser-url {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 9999px;
+    background: #f3f4f1;
+    color: #5f6862;
+  }
+
+  .lock {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+
+  .browser-install {
+    padding: 0.3rem 0.65rem;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 2.75rem);
+    gap: 0.75rem;
+  }
+
+  .home-app {
+    aspect-ratio: 1;
+    border-radius: 28%;
+    background: var(--color-soft);
+  }
+
+  /* El logo siempre en su verde original */
+  .home-quina {
+    display: grid;
+    place-items: center;
+    background: var(--color-primary-dark);
+    color: var(--color-primary);
+    box-shadow: 0 8px 18px -8px rgb(10 46 23 / 0.6);
+  }
+
+  /* En modo oscuro el menta suave y el verde oscuro casi coinciden: las demás
+     apps pasan a gris neutro y Quina lleva un filo verde para destacar */
+  :global([data-theme='dark']) .home-app {
+    background: var(--color-surface-hover);
+  }
+
+  :global([data-theme='dark']) .home-quina {
+    background: var(--color-primary-dark);
+    box-shadow:
+      0 0 0 1px rgb(43 221 102 / 0.5),
+      0 8px 18px -8px rgb(0 0 0 / 0.6);
+  }
+
+  .home-quina :global(.home-quina-logo) {
+    width: 56%;
+    height: auto;
+  }
+
+  /* ---- Nota del equipo ---- */
+
+  .devices-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 2rem;
+    color: var(--color-ink-soft);
+    text-align: center;
+  }
+
+  .devices-note :global(.note-icon) {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-link-active);
+  }
+</style>

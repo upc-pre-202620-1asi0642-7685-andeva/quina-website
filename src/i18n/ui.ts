@@ -129,6 +129,7 @@ export const ui = {
     cookieSettings: 'Configurar cookies',
     claims: 'Libro de Reclamaciones',
     madeIn: 'Hecho en Lima, Perú.',
+    productOf: ['un producto de ', ''],
     disclaimer: 'Quina es un software de gestión. No presta dinero ni capta fondos del público.',
   },
   en: {
@@ -157,6 +158,7 @@ export const ui = {
     cookieSettings: 'Cookie settings',
     claims: 'Complaints Book',
     madeIn: 'Made in Lima, Peru.',
+    productOf: ['a product by ', ''],
     disclaimer: 'Quina is management software. It does not lend money or take deposits.',
   },
   // Borrador en quechua sureño: requiere revisión de un traductor nativo antes de publicar.
@@ -187,6 +189,7 @@ export const ui = {
     cookieSettings: 'Cookies nisqata allichay',
     claims: 'Libro de Reclamaciones',
     madeIn: 'Lima llaqtapi ruwasqa, Perú.',
+    productOf: ['', 'pa huk ruwasqan'],
     disclaimer:
       'Quinaqa huk software llamk’anapaqmi. Manam qullqita manuchinchu nitaq runakunapa qullqinta waqaychanchu.',
   },

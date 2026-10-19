@@ -46,7 +46,7 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer" data-footer>
-  <div class="footer-inner" data-footer-inner>
+  <div class="footer-inner">
     <div class="wrap footer-top">
       <div class="footer-cta">
         <p class="footer-title">{t.footerTitle}</p>
@@ -117,7 +117,14 @@ const year = new Date().getFullYear();
 
     <div class="wrap footer-bottom">
       <p>
-        © {year} Quina. {t.madeIn}
+        {/* En una sola expresión: los saltos de línea del formateador no deben volverse espacios */}
+        {[
+          `© ${year} Quina, ${t.productOf[0]}`,
+          <a href={site.companyUrl} class="company-link">
+            Andeva
+          </a>,
+          `${t.productOf[1]}. ${t.madeIn}`,
+        ]}
       </p>
       <p>{t.disclaimer}</p>
     </div>
@@ -133,10 +140,16 @@ const year = new Date().getFullYear();
     overflow: hidden;
   }
 
-  /* Revelado desde atrás: solo con JS y si el footer cabe en la pantalla */
+  /* Telón (atelier): fijo detrás de la página y quieto mientras ella sube.
+     Si no cabe en la pantalla se fija arriba; site.ts desplaza el tramo sobrante. */
   :global(html.js.footer-reveal) .site-footer {
     position: fixed;
     inset: auto 0 0;
+  }
+
+  :global(html.js.footer-reveal-tall) .site-footer {
+    inset: 0 0 auto;
+    will-change: transform;
   }
 
   .wrap {
@@ -146,7 +159,6 @@ const year = new Date().getFullYear();
 
   .footer-inner {
     padding-top: clamp(4rem, 3rem + 4vw, 7rem);
-    will-change: transform;
   }
 
   .footer-top {
@@ -252,5 +264,18 @@ const year = new Date().getFullYear();
     padding-block: 2rem 1.5rem;
     font-size: 0.875rem;
     color: rgb(255 255 255 / 0.6);
+  }
+
+  /* Subrayado para distinguirlo del texto que lo rodea, no solo por el color */
+  .company-link {
+    color: #fff;
+    text-decoration: underline;
+    text-decoration-color: rgb(255 255 255 / 0.4);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 200ms var(--ease-out-expo);
+  }
+
+  .company-link:hover {
+    text-decoration-color: currentColor;
   }
 </style>
