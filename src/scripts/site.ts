@@ -269,6 +269,115 @@ function initMagnetic() {
 }
 
 /* ---------------------------------------------------------------------------
+   Cursor de la tarjeta CTA (21st.dev magnetic-cursor): un círculo sigue al mouse
+   con retraso, se estira con la velocidad, invierte lo que tiene debajo
+   (mix-blend-mode en CtaBand.astro) y abraza el botón que tocas.
+   El cambio de tamaño es FLIP: se fija el tamaño final y se anima solo la escala.
+   --------------------------------------------------------------------------- */
+
+function initCursorZones() {
+  if (!finePointer || reduced) return;
+  document.querySelectorAll<HTMLElement>('[data-cursor-zone]').forEach((zone) => {
+    const dot = zone.querySelector<HTMLElement>('[data-cursor]');
+    if (!dot) return;
+    const size = dot.offsetWidth;
+    const pad = 10;
+    const pointer = { x: 0, y: 0 };
+    const pos = { x: 0, y: 0 };
+    const morph = { sx: 1, sy: 1 };
+    let box = { w: size, h: size };
+    let active: HTMLElement | null = null;
+    let settled = true;
+    let running = false;
+
+    gsap.set(dot, { xPercent: -50, yPercent: -50 });
+
+    const tick = () => {
+      const z = zone.getBoundingClientRect();
+      let tx = pointer.x - z.left;
+      let ty = pointer.y - z.top;
+      if (active) {
+        const r = active.getBoundingClientRect();
+        tx = r.left + r.width / 2 - z.left;
+        ty = r.top + r.height / 2 - z.top;
+      }
+      // Interpolación independiente de los fps: el mismo retraso a 60 Hz que a 120 Hz
+      const k = 1 - Math.pow(1 - (active ? 0.2 : 0.12), gsap.ticker.deltaRatio());
+      const dx = (tx - pos.x) * k;
+      const dy = (ty - pos.y) * k;
+      pos.x += dx;
+      pos.y += dy;
+      const speed = active || !settled ? 0 : Math.hypot(dx, dy) * 0.02;
+      gsap.set(dot, {
+        x: pos.x,
+        y: pos.y,
+        rotate: speed > 0.01 ? (Math.atan2(dy, dx) * 180) / Math.PI : 0,
+        scaleX: morph.sx * (1 + Math.min(speed, 1)),
+        scaleY: morph.sy * (1 - Math.min(speed, 0.3)),
+      });
+    };
+
+    // Cambia el tamaño real sin salto visual y anima la escala hasta 1
+    const resize = (w: number, h: number, onComplete = () => {}) => {
+      const visual = { w: box.w * morph.sx, h: box.h * morph.sy };
+      box = { w, h };
+      dot.style.width = `${w}px`;
+      dot.style.height = `${h}px`;
+      morph.sx = visual.w / w;
+      morph.sy = visual.h / h;
+      settled = false;
+      gsap.to(morph, {
+        sx: 1,
+        sy: 1,
+        duration: 0.5,
+        ease: 'power3.out',
+        overwrite: true,
+        onComplete,
+      });
+    };
+
+    zone.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      if (running) return;
+      running = true;
+      const z = zone.getBoundingClientRect();
+      pos.x = e.clientX - z.left;
+      pos.y = e.clientY - z.top;
+      gsap.ticker.add(tick);
+      gsap.to(dot, { opacity: 1, duration: 0.25, overwrite: 'auto' });
+    });
+
+    zone.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse' || !running) return;
+      running = false;
+      gsap.to(dot, {
+        opacity: 0,
+        duration: 0.25,
+        overwrite: 'auto',
+        onComplete: () => {
+          if (!running) gsap.ticker.remove(tick);
+        },
+      });
+    });
+
+    zone.querySelectorAll<HTMLElement>('[data-cursor-target]').forEach((el) => {
+      el.addEventListener('pointerenter', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        active = el;
+        resize(el.offsetWidth + pad * 2, el.offsetHeight + pad * 2);
+      });
+      el.addEventListener('pointerleave', (e) => {
+        if (e.pointerType !== 'mouse' || active !== el) return;
+        active = null;
+        resize(size, size, () => (settled = true));
+      });
+    });
+  });
+}
+
+/* ---------------------------------------------------------------------------
    Hero: titular palabra por palabra, ventana del producto y tarjetas
    --------------------------------------------------------------------------- */
 
@@ -593,6 +702,7 @@ if (reduced) {
   initTilt();
   initVideo();
   initMagnetic();
+  initCursorZones();
 }
 
 window.addEventListener('load', () => ScrollTrigger.refresh());

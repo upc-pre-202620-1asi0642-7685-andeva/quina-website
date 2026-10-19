@@ -168,6 +168,25 @@ anamorphic feel, deep green shadows and amber highlights, lots of breathing room
 in the center for a play button overlay, 16:9.
 ```
 
+## 8b. `cta-pintura` - Fondo de la tarjeta CTA final
+
+- **Dónde va:** fondo de la tarjeta CTA al final de la portada y de las páginas
+  internas. Encima van el ícono, el titular en verde oscuro y dos botones, así
+  que el centro debe ser claro y tranquilo. Se ve igual en tema claro y oscuro.
+- **Formato:** 21:9 horizontal, mínimo 3000 × 1300 px. En móvil se recorta al
+  centro en vertical.
+
+```text
+Loose expressive oil painting of a hazy morning over the Lima coastline and its
+green hillside neighborhoods, seen from far away, painted with broad, visible
+brush strokes and palette-knife texture. Soft pale sky with light mint and warm
+cream tones, gentle peach-amber haze, fresh greens (#2bdd66 as small accents,
+deep greens #0a2e17 only in a few distant shapes), touches of turquoise sea.
+The center of the frame stays light, airy and low in detail for text overlay;
+denser color only toward the edges and the bottom. Calm, optimistic, handmade
+feel. No people, no buildings in detail, no text, no logos. Wide 21:9.
+```
+
 ---
 
 ## Imágenes de las páginas internas

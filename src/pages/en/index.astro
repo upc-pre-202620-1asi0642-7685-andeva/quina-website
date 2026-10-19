@@ -8,6 +8,7 @@ import HowItWorks from '@/components/astro/HowItWorks.astro';
 import Calculator from '@/components/astro/Calculator.astro';
 import Pricing from '@/components/astro/Pricing.astro';
 import FaqSection from '@/components/astro/FaqSection.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
 import { home } from '@/i18n/home';
 import { homeFaqEn } from '@/data/faq';
 
@@ -22,5 +23,6 @@ const c = home.en;
   <HowItWorks lang="en" />
   <Calculator lang="en" />
   <Pricing lang="en" />
+  <CtaBand lang="en" />
   <FaqSection id="faq" title={c.faqTitle} items={homeFaqEn} />
 </BaseLayout>

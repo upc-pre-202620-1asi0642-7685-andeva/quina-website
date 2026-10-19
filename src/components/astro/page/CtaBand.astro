@@ -1,31 +1,62 @@
 ---
+/**
+ * CTA en tarjeta pintada (estructura de Aceternity "CTA with background noise"):
+ * titular, texto y botones a la izquierda; a la derecha la ventana de la webapp
+ * inclinada en 3D que se sale por el borde. Dentro de la tarjeta un círculo sigue
+ * al mouse, invierte lo que tiene debajo y abraza el botón que tocas
+ * (data-cursor-zone en src/scripts/site.ts).
+ */
 import Button from '../Button.astro';
-import { appLinks } from '@/i18n/ui';
+import AppWindow from '../AppWindow.astro';
+import Picture from '../Picture.astro';
+import { home } from '@/i18n/home';
+import { appLinks, langHome, type Lang } from '@/i18n/ui';
 
 interface Props {
+  lang?: Lang;
   title?: string;
   text?: string;
 }
 
-const {
-  title = 'Deja el cuaderno este mes',
-  text = 'Empieza gratis con tus primeros 15 vecinos. Sin tarjeta y en dos minutos.',
-} = Astro.props;
+const { lang = 'es', ...props } = Astro.props;
+const c = home[lang].cta;
+const hero = home[lang].hero;
+const title = props.title ?? c.title;
+const text = props.text ?? c.text;
+// El secundario lleva a "cómo funciona" de la portada, también desde las páginas internas
+const secondaryHref = `${langHome[lang]}${hero.secondaryHref}`;
 ---
 
 <section class="cta-band">
-  <div class="cta-card" data-reveal-group>
-    <h2 class="cta-title" data-split>
-      {title}
-    </h2>
-    <p class="cta-text" data-reveal>
-      {text}
-    </p>
-    <div data-reveal>
-      <Button href={appLinks.signup} size="lg">
-        Registra tu bodega gratis
-      </Button>
+  <div class="cta-card" data-cursor-zone>
+    <div class="cta-bg" aria-hidden="true">
+      <Picture id="cta-pintura" alt="" tone="green" />
     </div>
+
+    <div class="cta-copy" data-reveal-group>
+      <h2 class="cta-title" data-split>
+        {title}
+      </h2>
+      <p class="cta-text" data-reveal>
+        {text}
+      </p>
+      <div class="cta-actions" data-reveal>
+        <Button href={appLinks.signup} size="lg" data-cursor-target>
+          {hero.primary}
+        </Button>
+        <Button href={secondaryHref} variant="light" size="lg" data-cursor-target>
+          {hero.secondary}
+        </Button>
+      </div>
+    </div>
+
+    <div class="cta-visual" data-tilt>
+      <div class="device-frame">
+        <AppWindow />
+      </div>
+    </div>
+
+    <span class="cta-cursor" data-cursor aria-hidden="true"></span>
   </div>
 </section>
 
@@ -34,37 +65,148 @@ const {
     padding: 0 0.75rem clamp(6rem, 4rem + 6vw, 10rem);
   }
 
+  /* Tras la banda de color de las preguntas, aire para que no queden pegadas */
+  :global(.faq-section) + .cta-band {
+    padding-top: clamp(4rem, 3rem + 3vw, 6rem);
+  }
+
+  /* La tarjeta es una "foto": igual en ambos temas, con tinta oscura fija */
   .cta-card {
+    position: relative;
+    isolation: isolate;
     display: grid;
-    justify-items: center;
-    gap: 1.5rem;
-    padding: clamp(4rem, 3rem + 5vw, 8rem) 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3.5rem;
+    padding: clamp(3.5rem, 2.5rem + 4vw, 6.5rem) clamp(1.5rem, 0.5rem + 4vw, 5.5rem) 0;
+    overflow: hidden;
     border-radius: 28px;
-    background: var(--color-primary);
     color: var(--color-primary-dark);
-    text-align: center;
+  }
+
+  .cta-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  /* Velo claro detrás del texto: la pintura tiene pinceladas oscuras en los bordes */
+  .cta-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        90deg,
+        rgb(250 248 240 / 0.82) 0%,
+        rgb(250 248 240 / 0.55) 40%,
+        transparent 65%
+      ),
+      linear-gradient(0deg, rgb(250 248 240 / 0.35), transparent 50%);
+  }
+
+  @media (max-width: 959px) {
+    .cta-bg::after {
+      background: linear-gradient(
+        180deg,
+        rgb(250 248 240 / 0.8) 0%,
+        rgb(250 248 240 / 0.5) 45%,
+        transparent 70%
+      );
+    }
+  }
+
+  /* Mientras no exista public/images/cta-pintura.*, un fondo pintado con la paleta de Quina */
+  .cta-bg :global(.placeholder) {
+    background:
+      radial-gradient(60% 50% at 12% 18%, #c9f5d6 0%, transparent 70%),
+      radial-gradient(45% 40% at 88% 22%, #ffe2a6 0%, transparent 70%),
+      radial-gradient(70% 55% at 80% 85%, #7fe3a0 0%, transparent 70%),
+      radial-gradient(60% 50% at 15% 90%, #a8ecbd 0%, transparent 70%), #e3f9ea;
+    color: rgb(10 46 23 / 0.45);
+  }
+
+  .cta-copy {
+    display: grid;
+    justify-items: start;
+    align-content: center;
+    gap: 1.5rem;
   }
 
   .cta-title {
-    max-width: 16ch;
+    max-width: 12ch;
     font-size: var(--text-headline);
     line-height: 1;
     letter-spacing: -0.04em;
     font-weight: 700;
+    text-wrap: balance;
   }
 
   .cta-text {
-    max-width: 32rem;
+    max-width: 30rem;
     font-size: 1.125rem;
     line-height: 1.5;
   }
 
-  .cta-card :global(.btn-primary) {
-    background: var(--color-primary-dark);
-    color: #fff;
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.875rem;
+    margin-top: 0.75rem;
   }
 
-  .cta-card :global(.btn-primary:hover) {
-    background: #12462a;
+  /* Los botones van sobre el círculo: los abraza sin invertir su color (el verde
+     Quina se queda verde). Va en la fila porque la entrada animada le crea su
+     propio contexto de apilamiento. */
+  .cta-actions {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* La ventana se sale por abajo (y por la derecha en escritorio), como en Aceternity */
+  /* En móvil se ve solo la parte de arriba de la ventana, recortada por la tarjeta */
+  .cta-visual {
+    height: 20rem;
+    perspective: 1400px;
+  }
+
+  .cta-visual .device-frame {
+    width: 44rem;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  @media (min-width: 960px) {
+    .cta-card {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: center;
+      gap: 2rem;
+      min-height: 38rem;
+    }
+
+    .cta-copy {
+      padding-bottom: clamp(3.5rem, 2.5rem + 4vw, 6.5rem);
+    }
+
+    .cta-visual {
+      align-self: end;
+      height: auto;
+      margin-right: -12rem;
+      margin-bottom: -5rem;
+    }
+  }
+
+  .cta-cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: #fff;
+    mix-blend-mode: exclusion;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform, opacity;
   }
 </style>

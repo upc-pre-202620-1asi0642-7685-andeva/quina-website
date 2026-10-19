@@ -158,6 +158,10 @@ export const home = {
       lead: 'Tus vecinos nunca pagan nada. Una sola deuda de S/ 30 que recuperes ya paga el mes de Bodega Pro.',
     },
     faqTitle: 'Lo que nos preguntan los caseros',
+    cta: {
+      title: 'Deja el cuaderno este mes',
+      text: 'Pasa tus fiados a Quina en una tarde: cada vecino con su límite, su fecha de pago y su recordatorio.',
+    },
   },
   en: {
     meta: {
@@ -310,6 +314,10 @@ export const home = {
       lead: 'Neighbors never pay anything. Recovering a single S/ 30 debt already covers a month of Bodega Pro.',
     },
     faqTitle: 'What shop owners ask us',
+    cta: {
+      title: 'Retire the notebook this month',
+      text: 'Move your credit book to Quina in one afternoon: every customer with a limit, a due date and a reminder.',
+    },
   },
   // Borrador en quechua sureño: requiere revisión de un traductor nativo antes de publicar.
   qu: {
@@ -469,6 +477,10 @@ export const home = {
       lead: 'Vecinoykikunaqa manam imatapas paganqakuchu. Huk S/ 30 manuta kutichiptiykiqa, Bodega Proqa huk killapaq pagasqañam.',
     },
     faqTitle: 'Caserokunapa tapukuyninkuna',
+    cta: {
+      title: 'Kay killapi cuadernota saqiy',
+      text: 'Huk sukhayllapi manukunata Quinaman apay: sapa vecinopaq límite, pagana p’unchaw, yuyarichiypas.',
+    },
   },
 } as const;
 
