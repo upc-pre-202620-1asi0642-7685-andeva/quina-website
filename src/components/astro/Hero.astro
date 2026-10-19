@@ -47,13 +47,19 @@ const how = home[lang].how;
           data-video-open
         >
           <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
-            <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" fill="currentColor" />
+            <path
+              d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"
+              fill="currentColor"
+            />
           </svg>
           {c.secondary}
         </Button>
       </div>
       <p class="hero-login" data-hero-fade>
-        {c.hasAccount} <a href={appLinks.login} class="hero-login-link">{c.login}</a>
+        {c.hasAccount}{' '}
+        <a href={appLinks.login} class="hero-login-link">
+          {c.login}
+        </a>
       </p>
     </div>
   </div>
@@ -61,7 +67,12 @@ const how = home[lang].how;
   <HeroShowcase lang={lang} />
 </section>
 
-<VideoModal title={c.videoTitle} closeLabel={c.videoClose} soon={c.videoSoon} posterAlt={how.posterAlt} />
+<VideoModal
+  title={c.videoTitle}
+  closeLabel={c.videoClose}
+  soon={c.videoSoon}
+  posterAlt={how.posterAlt}
+/>
 
 <style>
   .hero {
