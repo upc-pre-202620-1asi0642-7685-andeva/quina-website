@@ -8,6 +8,8 @@ const appUrl = PUBLIC_APP_URL.replace(/\/$/, '');
 export const site = {
   name: 'Quina',
   url: 'https://quina.andeva.tech',
+  // Quina es un producto de Andeva
+  companyUrl: 'https://andeva.tech',
   appSignupUrl: `${appUrl}/register`,
   appLoginUrl: `${appUrl}/login`,
   contactEmail: PUBLIC_CONTACT_EMAIL,

@@ -609,54 +609,64 @@ function initVideo() {
 }
 
 /* ---------------------------------------------------------------------------
-   Footer que aparece desde atrás (Folira)
+   Footer que aparece desde atrás, quieto como un telón (atelier): la página
+   sube y lo destapa. Si el footer es más alto que la pantalla, se destapa
+   desde su parte de arriba y solo el tramo que no cabe se desplaza al final,
+   al mismo ritmo del scroll, para que todo siga siendo alcanzable.
    --------------------------------------------------------------------------- */
 
 function initFooterReveal() {
   const footer = document.querySelector<HTMLElement>('[data-footer]');
   const main = document.querySelector<HTMLElement>('[data-main]');
-  const inner = footer?.querySelector<HTMLElement>('[data-footer-inner]');
-  if (!footer || !main || !inner) return;
+  if (!footer || !main) return;
 
   const html = document.documentElement;
   let tween: gsap.core.Tween | null = null;
+  let overflow = 0;
 
   const update = () => {
-    html.classList.remove('footer-reveal');
-    main.style.marginBottom = '';
-    const h = footer.offsetHeight;
-    const fits = h < window.innerHeight * 0.95;
     tween?.scrollTrigger?.kill();
     tween?.kill();
     tween = null;
-    gsap.set(inner, { clearProps: 'transform' });
-    if (!fits) return;
+    gsap.set(footer, { clearProps: 'transform' });
 
+    const h = footer.offsetHeight;
+    overflow = Math.max(0, h - window.innerHeight);
     html.classList.add('footer-reveal');
+    html.classList.toggle('footer-reveal-tall', overflow > 0);
     main.style.marginBottom = `${h}px`;
-    if (!reduced) {
-      tween = gsap.fromTo(
-        inner,
-        { yPercent: -35, scale: 0.96 },
-        {
-          yPercent: 0,
-          scale: 1,
-          ease: 'none',
-          scrollTrigger: { trigger: main, start: 'bottom bottom', end: `+=${h}`, scrub: true },
-        },
-      );
+
+    // No es una animación sino la posición atada 1:1 al scroll: aplica también con movimiento reducido
+    if (overflow > 0) {
+      tween = gsap.to(footer, {
+        y: -overflow,
+        ease: 'none',
+        scrollTrigger: { trigger: main, start: 'bottom top', end: `+=${overflow}`, scrub: true },
+      });
     }
+    ScrollTrigger.refresh();
   };
+
+  // Con teclado, un enlace del footer puede quedar tapado por la página: se lleva a la vista
+  footer.addEventListener('focusin', (e) => {
+    const el = e.target as HTMLElement;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const offset = el.getBoundingClientRect().bottom - footer.getBoundingClientRect().top;
+    const extra = gsap.utils.clamp(0, overflow, offset + 48 - window.innerHeight);
+    const y = max - overflow + extra;
+    const lenis = getLenis();
+    if (lenis) lenis.scrollTo(y, { immediate: true });
+    else window.scrollTo(0, y);
+  });
 
   update();
   let raf = 0;
-  window.addEventListener('resize', () => {
+  const schedule = () => {
     cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(() => {
-      update();
-      ScrollTrigger.refresh();
-    });
-  });
+    raf = requestAnimationFrame(update);
+  };
+  window.addEventListener('resize', schedule);
+  new ResizeObserver(schedule).observe(footer);
 }
 
 /* ---------------------------------------------------------------------------
