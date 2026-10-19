@@ -9,6 +9,7 @@ interface Props {
 
 const { lang = 'es' } = Astro.props;
 const c = home[lang].features;
+const num = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
 <section id={c.id} class="features" aria-labelledby="features-title">
@@ -19,57 +20,89 @@ const c = home[lang].features;
     </p>
   </div>
 
-  {c.items.map((f, i) => (
-    <article class:list={['feature', { reverse: i % 2 === 1 }]}>
-      <span class="feature-rule" data-rule aria-hidden="true" />
-      <div class="feature-inner wrap">
-        <div class="feature-text" data-reveal-group>
-          <p class="feature-tag" data-reveal>
-            {String(i + 1).padStart(2, '0')} / {f.tag}
-          </p>
-          <h3 class="feature-title" data-reveal>
-            {f.title}
-          </h3>
-          <p class="feature-copy" data-reveal>
-            {f.text}
-          </p>
-          <ul class="feature-items" data-reveal>
-            {f.items.map((it) => (
-              <li>{it}</li>
-            ))}
-          </ul>
-          {f.href && (
-            <a href={f.href} class="feature-more" data-reveal>
-              {c.more}
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M5 12h14m-6-6 6 6-6 6"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  fill="none"
-                />
-              </svg>
-            </a>
-          )}
-        </div>
+  <!-- Sticky scroll reveal: el texto avanza y el dispositivo se queda fijo cambiando de pantalla -->
+  <div class="features-body wrap" data-sticky-reveal>
+    <div class="steps">
+      {c.items.map((f, i) => (
+        <article class:list={['step', { 'is-active': i === 0 }]} data-sticky-step>
+          <span class="step-rule" data-rule aria-hidden="true" />
+          <div class="step-text" data-reveal-group>
+            <p class="feature-tag" data-reveal>
+              {num(i)} / {f.tag}
+            </p>
+            <h3 class="feature-title" data-reveal>
+              {f.title}
+            </h3>
+            <p class="feature-copy" data-reveal>
+              {f.text}
+            </p>
+            <ul class="feature-items" data-reveal>
+              {f.items.map((it) => (
+                <li>{it}</li>
+              ))}
+            </ul>
+            {f.href && (
+              <a href={f.href} class="feature-more" data-reveal>
+                {c.more}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M5 12h14m-6-6 6 6-6 6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+            )}
+          </div>
 
-        <div class="feature-device" data-tilt={i % 2 === 1 ? 'right' : 'left'}>
-          <div class="device-frame">
-            <Picture id={f.image} alt={f.alt} tone="dark" />
+          <!-- En móvil cada paso lleva su propio dispositivo -->
+          <div class="step-device" data-tilt={i % 2 === 1 ? 'right' : 'left'}>
+            <div class="device-frame">
+              <Picture id={f.image} alt={f.alt} tone="dark" />
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div class="stage">
+      <div class="stage-sticky">
+        <div class="stage-device" data-sticky-device>
+          <div class="stage-frame">
+            {c.items.map((f, i) => (
+              <div class:list={['stage-slide', { 'is-active': i === 0 }]} data-sticky-slide>
+                <Picture id={f.image} alt={f.alt} tone="dark" />
+              </div>
+            ))}
           </div>
         </div>
+
+        <ol class="stage-progress" aria-hidden="true">
+          {c.items.map((f, i) => (
+            <li class:list={['progress-item', { 'is-active': i === 0 }]} data-sticky-label>
+              <span class="progress-track">
+                <span class="progress-bar" data-sticky-bar />
+              </span>
+              <span class="progress-label">
+                {num(i)} {f.tag}
+              </span>
+            </li>
+          ))}
+        </ol>
       </div>
-    </article>
-  ))}
+    </div>
+  </div>
 </section>
 
 <style>
   .features {
     position: relative;
-    padding-block: clamp(7rem, 5rem + 8vw, 12rem) 0;
+    padding-block: clamp(7rem, 5rem + 8vw, 12rem) clamp(3rem, 2rem + 4vw, 6rem);
     background: #0b120d;
     color: #f2f5f2;
-    overflow: hidden;
+    /* clip y no hidden: hidden crea un contenedor de scroll y rompe position: sticky */
+    overflow: clip;
   }
 
   .wrap {
@@ -80,7 +113,7 @@ const c = home[lang].features;
   .features-head {
     display: grid;
     gap: 2rem;
-    padding-bottom: clamp(5rem, 4rem + 4vw, 8rem);
+    padding-bottom: clamp(3rem, 2rem + 4vw, 6rem);
   }
 
   @media (min-width: 900px) {
@@ -103,32 +136,20 @@ const c = home[lang].features;
     color: rgb(242 245 242 / 0.72);
   }
 
-  .feature {
+  /* ---- Pasos ---- */
+
+  .step {
     position: relative;
+    padding-block: clamp(3.5rem, 3rem + 3vw, 5rem);
   }
 
-  .feature-rule {
+  .step-rule {
+    position: absolute;
+    inset: 0 0 auto;
     display: block;
     height: 1px;
     background: rgb(255 255 255 / 0.14);
     transform-origin: left;
-  }
-
-  .feature-inner {
-    display: grid;
-    gap: 3rem;
-    align-items: center;
-    padding-block: clamp(4rem, 3rem + 4vw, 7rem);
-  }
-
-  @media (min-width: 900px) {
-    .feature-inner {
-      grid-template-columns: 0.85fr 1.15fr;
-      gap: 4rem;
-    }
-    .reverse .feature-text {
-      order: 2;
-    }
   }
 
   .feature-tag {
@@ -140,7 +161,7 @@ const c = home[lang].features;
 
   .feature-title {
     margin-top: 1.25rem;
-    font-size: clamp(2.25rem, 1.4rem + 3vw, 4.25rem);
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 4rem);
     line-height: 1;
     letter-spacing: -0.04em;
     font-weight: 600;
@@ -184,15 +205,144 @@ const c = home[lang].features;
     translate: 0.375rem 0;
   }
 
-  .feature-device {
+  .step-device {
+    margin-top: 3rem;
     perspective: 1400px;
   }
 
-  .device-frame {
+  .device-frame,
+  .stage-frame {
     aspect-ratio: 16 / 10;
     border-radius: 18px;
     overflow: hidden;
+  }
+
+  .device-frame {
     transform-style: preserve-3d;
     will-change: transform;
+  }
+
+  .stage {
+    display: none;
+  }
+
+  /* ---- Escritorio: columna de texto + dispositivo fijo ---- */
+
+  @media (min-width: 900px) {
+    .features-body {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 4rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      min-height: 85svh;
+      padding-block: 4rem;
+    }
+
+    /* Los pasos inactivos se apagan con color y no con opacity, para no bajar
+       del contraste AA (3:1 en el titular grande, 4.5:1 en el texto) */
+    .feature-title,
+    .feature-copy {
+      transition: color 600ms var(--ease-out-expo);
+    }
+
+    :global(html.js) .step:not(.is-active) .feature-title {
+      color: rgb(242 245 242 / 0.42);
+    }
+
+    :global(html.js) .step:not(.is-active) .feature-copy {
+      color: rgb(242 245 242 / 0.56);
+    }
+
+    .step-rule {
+      transition: background-color 600ms var(--ease-out-expo);
+    }
+
+    .step.is-active .step-rule {
+      background: var(--color-primary);
+    }
+
+    .step-device {
+      display: none;
+    }
+
+    .stage {
+      display: block;
+    }
+
+    .stage-sticky {
+      position: sticky;
+      top: 0;
+      display: grid;
+      align-content: center;
+      gap: 2rem;
+      height: 100svh;
+      padding-top: 4.5rem; /* compensa el header fijo */
+    }
+
+    .stage-device {
+      perspective: 1400px;
+    }
+
+    .stage-frame {
+      position: relative;
+      background: #1b2a20;
+      box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.6);
+      will-change: transform;
+    }
+
+    .stage-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.06);
+      transition:
+        opacity 700ms var(--ease-out-expo),
+        transform 1100ms var(--ease-out-expo);
+    }
+
+    .stage-slide.is-active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .stage-progress {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .progress-track {
+      display: block;
+      height: 2px;
+      border-radius: 2px;
+      background: rgb(255 255 255 / 0.14);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      display: block;
+      height: 100%;
+      background: var(--color-primary);
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+
+    .progress-label {
+      display: block;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: rgb(242 245 242 / 0.58);
+      transition: color 400ms var(--ease-out-expo);
+    }
+
+    .progress-item.is-active .progress-label {
+      color: #f2f5f2;
+    }
   }
 </style>

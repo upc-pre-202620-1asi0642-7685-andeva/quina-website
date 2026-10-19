@@ -18,7 +18,8 @@ export const home = {
       videoSoon: 'El video de presentación llega muy pronto.',
       hasAccount: '¿Ya tienes una cuenta?',
       login: 'Inicia sesión',
-      imageAlt: 'Bodeguero en el mostrador de su tienda entregando una compra al fiado a una vecina',
+      imageAlt:
+        'Bodeguero en el mostrador de su tienda entregando una compra al fiado a una vecina',
       sale: 'Nueva venta al crédito',
       saleOk: 'Dentro del límite. Quedan S/ 113.60',
       mailTitle: 'Recordatorio enviado',
@@ -328,7 +329,8 @@ export const home = {
       videoSoon: 'Video de presentación llega muy pronto.',
       hasAccount: '¿Cuentayki kanñachu?',
       login: 'Yaykuy',
-      imageAlt: 'Bodeguero en el mostrador de su tienda entregando una compra al fiado a una vecina',
+      imageAlt:
+        'Bodeguero en el mostrador de su tienda entregando una compra al fiado a una vecina',
       sale: 'Musuq venta manupi',
       saleOk: 'Límite ukhupim. S/ 113.60 puchun',
       mailTitle: 'Yuyarichiy apachisqa',
