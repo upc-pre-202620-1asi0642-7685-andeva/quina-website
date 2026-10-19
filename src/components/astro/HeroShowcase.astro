@@ -47,7 +47,14 @@ const check = 'M7 12.5l3.2 3.2L17 9';
     </div>
     <div class="sale-ok" data-sale-ok>
       <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
-        <path d={check} stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        <path
+          d={check}
+          stroke="currentColor"
+          stroke-width="2.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
       {c.saleOk}
     </div>
@@ -114,7 +121,13 @@ const check = 'M7 12.5l3.2 3.2L17 9';
     <div class="mail-head">
       <span class="mail-icon">
         <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
-          <path d="M4 6h16v12H4zM4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round" />
+          <path
+            d="M4 6h16v12H4zM4 7l8 6 8-6"
+            stroke="currentColor"
+            stroke-width="1.8"
+            fill="none"
+            stroke-linejoin="round"
+          />
         </svg>
       </span>
       <span class="mail-meta">
@@ -124,7 +137,9 @@ const check = 'M7 12.5l3.2 3.2L17 9';
     </div>
     <div class="mail-content">
       <span class="typing" data-mail-typing>
-        <i></i><i></i><i></i>
+        <i></i>
+        <i></i>
+        <i></i>
       </span>
       <p class="mail-body" data-mail-body set:html={c.mailBody} />
     </div>
@@ -668,14 +683,22 @@ const check = 'M7 12.5l3.2 3.2L17 9';
       gsap.set(mailBody, { autoAlpha: 0, y: 6 });
 
       // Una sola secuencia, en orden. Al terminar todo se va y vuelve a empezar desde la ventana vacía.
-      const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.8, defaults: { ease: 'expo.out' } });
+      const tl = gsap.timeline({
+        paused: true,
+        repeat: -1,
+        repeatDelay: 0.8,
+        defaults: { ease: 'expo.out' },
+      });
 
       tl.add(() => dots.pause(), 0);
 
       // 0) La ventana de la app se arma
       tl.to(win, { autoAlpha: 1, y: 0, duration: 1.2 })
         .to(rows, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.07 }, '-=0.7')
-        .add(counts.map((el) => countUp(el, 1.4)), '<')
+        .add(
+          counts.map((el) => countUp(el, 1.4)),
+          '<',
+        )
         .to(appBar, { scaleX: 1, duration: 1.2, ease: 'power3.out' }, '<0.1')
         .to(badge, { autoAlpha: 1, scale: 1, duration: 0.5, ease: snap }, '-=0.4');
 
@@ -707,17 +730,33 @@ const check = 'M7 12.5l3.2 3.2L17 9';
           .to(calEvents, { autoAlpha: 1, x: 0, duration: 0.5, stagger: 0.25, ease: pop }, '+=0.1')
           .to(
             calDot,
-            { x: () => (calDot.parentElement!.clientWidth - 10) * 0.35, duration: 1, ease: 'power3.inOut' },
+            {
+              x: () => (calDot.parentElement!.clientWidth - 10) * 0.35,
+              duration: 1,
+              ease: 'power3.inOut',
+            },
             '+=0.4',
           )
-          .to(calEvents[0]!, { scale: 1.04, duration: 0.18, yoyo: true, repeat: 1, ease: 'power2.out' })
+          .to(calEvents[0]!, {
+            scale: 1.04,
+            duration: 0.18,
+            yoyo: true,
+            repeat: 1,
+            ease: 'power2.out',
+          })
           .to(calPaid, { autoAlpha: 1, scale: 1, duration: 0.55, ease: snap }, '<0.05');
       }
 
       // 5) Pausa para mirar el resultado, y salida: tarjetas en orden inverso y luego la ventana
-      const shown = wide ? [cards.cal, cards.mail, cards.tasks, cards.sale] : [cards.mail, cards.tasks];
+      const shown = wide
+        ? [cards.cal, cards.mail, cards.tasks, cards.sale]
+        : [cards.mail, cards.tasks];
       tl.addLabel('exit', '+=3')
-        .to(shown, { autoAlpha: 0, y: 24, scale: 0.94, duration: 0.45, stagger: 0.12, ease: 'power2.out' }, 'exit')
+        .to(
+          shown,
+          { autoAlpha: 0, y: 24, scale: 0.94, duration: 0.45, stagger: 0.12, ease: 'power2.out' },
+          'exit',
+        )
         .to(win, { autoAlpha: 0, y: 40, duration: 0.6, ease: 'power2.out' }, '>-0.1');
 
       let started = false;
@@ -740,7 +779,10 @@ const check = 'M7 12.5l3.2 3.2L17 9';
           if (!started) return;
           if (self.isActive) {
             tl.resume();
-            if (gsap.getProperty(typing, 'opacity') === 1 && gsap.getProperty(cards.mail, 'opacity') === 1)
+            if (
+              gsap.getProperty(typing, 'opacity') === 1 &&
+              gsap.getProperty(cards.mail, 'opacity') === 1
+            )
               dots.resume();
           } else {
             tl.pause();
