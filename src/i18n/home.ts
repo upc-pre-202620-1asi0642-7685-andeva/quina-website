@@ -161,6 +161,9 @@ export const home = {
     cta: {
       title: 'Deja el cuaderno este mes',
       text: 'Pasa tus fiados a Quina en una tarde: cada vecino con su límite, su fecha de pago y su recordatorio.',
+      primary: 'Empieza gratis hoy',
+      secondary: 'Ver planes',
+      secondaryHref: '/planes',
     },
   },
   en: {
@@ -317,6 +320,10 @@ export const home = {
     cta: {
       title: 'Retire the notebook this month',
       text: 'Move your credit book to Quina in one afternoon: every customer with a limit, a due date and a reminder.',
+      primary: 'Start free today',
+      secondary: 'See plans',
+      // La página de planes solo existe en castellano: lleva a los precios de la portada
+      secondaryHref: '/en/#pricing',
     },
   },
   // Borrador en quechua sureño: requiere revisión de un traductor nativo antes de publicar.
@@ -480,6 +487,9 @@ export const home = {
     cta: {
       title: 'Kay killapi cuadernota saqiy',
       text: 'Huk sukhayllapi manukunata Quinaman apay: sapa vecinopaq límite, pagana p’unchaw, yuyarichiypas.',
+      primary: 'Kunanmanta gratis qallariy',
+      secondary: 'Chaninkunata qhaway',
+      secondaryHref: '/qu/#chaninkuna',
     },
   },
 } as const;

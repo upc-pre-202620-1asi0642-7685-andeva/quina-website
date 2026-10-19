@@ -10,21 +10,20 @@ import Button from '../Button.astro';
 import AppWindow from '../AppWindow.astro';
 import Picture from '../Picture.astro';
 import { home } from '@/i18n/home';
-import { appLinks, langHome, type Lang } from '@/i18n/ui';
+import { appLinks, type Lang } from '@/i18n/ui';
 
 interface Props {
   lang?: Lang;
   title?: string;
   text?: string;
+  /** Muestra "Ver planes"; se apaga en la propia página de planes. */
+  secondary?: boolean;
 }
 
-const { lang = 'es', ...props } = Astro.props;
+const { lang = 'es', secondary = true, ...props } = Astro.props;
 const c = home[lang].cta;
-const hero = home[lang].hero;
 const title = props.title ?? c.title;
 const text = props.text ?? c.text;
-// El secundario lleva a "cómo funciona" de la portada, también desde las páginas internas
-const secondaryHref = `${langHome[lang]}${hero.secondaryHref}`;
 ---
 
 <section class="cta-band">
@@ -42,11 +41,33 @@ const secondaryHref = `${langHome[lang]}${hero.secondaryHref}`;
       </p>
       <div class="cta-actions" data-reveal>
         <Button href={appLinks.signup} size="lg" data-cursor-target>
-          {hero.primary}
+          {c.primary}
+          <svg viewBox="0 0 24 24" class="cta-arrow size-5" aria-hidden="true">
+            <path
+              d="M5 12h14m-6-6 6 6-6 6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.25"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
         </Button>
-        <Button href={secondaryHref} variant="light" size="lg" data-cursor-target>
-          {hero.secondary}
-        </Button>
+        {secondary && (
+          <Button href={c.secondaryHref} variant="light" size="lg" data-cursor-target>
+            <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
+              <path
+                d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+              />
+              <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" />
+            </svg>
+            {c.secondary}
+          </Button>
+        )}
       </div>
     </div>
 
@@ -139,6 +160,21 @@ const secondaryHref = `${langHome[lang]}${hero.secondaryHref}`;
     letter-spacing: -0.04em;
     font-weight: 700;
     text-wrap: balance;
+  }
+
+  /* La flecha del principal avanza un poco al pasar el mouse */
+  .cta-arrow {
+    transition: translate 300ms var(--ease-out-expo);
+  }
+
+  .cta-actions :global(.btn:hover) .cta-arrow {
+    translate: 0.25rem 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta-arrow {
+      transition: none;
+    }
   }
 
   .cta-text {
