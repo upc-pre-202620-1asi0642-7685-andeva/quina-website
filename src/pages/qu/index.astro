@@ -6,9 +6,11 @@ import Problem from '@/components/astro/Problem.astro';
 import Marquee from '@/components/astro/Marquee.astro';
 import Features from '@/components/astro/Features.astro';
 import HowItWorks from '@/components/astro/HowItWorks.astro';
+import Devices from '@/components/astro/Devices.astro';
 import Calculator from '@/components/astro/Calculator.astro';
 import Pricing from '@/components/astro/Pricing.astro';
 import FaqSection from '@/components/astro/FaqSection.astro';
+import CtaBand from '@/components/astro/page/CtaBand.astro';
 import { home } from '@/i18n/home';
 import { homeFaqQu } from '@/data/faq';
 
@@ -21,7 +23,9 @@ const c = home.qu;
   <Marquee text={c.marquee} />
   <Features lang="qu" />
   <HowItWorks lang="qu" />
+  <Devices lang="qu" />
   <Calculator lang="qu" />
   <Pricing lang="qu" />
   <FaqSection id="tapukuykuna" title={c.faqTitle} items={homeFaqQu} />
+  <CtaBand lang="qu" />
 </BaseLayout>

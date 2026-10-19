@@ -21,10 +21,6 @@ export const homeFaq: FaqItem[] = [
     q: '¿Qué pasa con los datos de mis clientes?',
     a: 'Se tratan según la Ley N.° 29733 de Protección de Datos Personales. No los compartimos con terceros y cada vecino puede ejercer sus derechos de acceso, rectificación, cancelación y oposición.',
   },
-  {
-    q: '¿Necesito instalar algo?',
-    a: 'No. Quina funciona desde el navegador de tu celular y puedes agregarla a tu pantalla de inicio como una app.',
-  },
 ];
 
 export const homeFaqEn: FaqItem[] = [
@@ -47,10 +43,6 @@ export const homeFaqEn: FaqItem[] = [
   {
     q: 'What happens to my customers’ data?',
     a: 'It is handled under Peru’s Personal Data Protection Law (Law No. 29733). We don’t share it with third parties and every neighbor can exercise their access, correction, deletion and objection rights.',
-  },
-  {
-    q: 'Do I need to install anything?',
-    a: 'No. Quina runs in your phone’s browser and you can add it to your home screen like an app.',
   },
 ];
 
@@ -76,14 +68,16 @@ export const homeFaqQu: FaqItem[] = [
     q: '¿Imataq clienteykunapa datonkunawan pasan?',
     a: 'Ley N.° 29733 (Ley de Protección de Datos Personales) nisqaman hinam waqaychakun. Manam hukkunaman quykuchu, sapa vecinotaq derechonkunata mañakunman: rikuy, allichay, chinkachiy, mana munay.',
   },
-  {
-    q: '¿Imatapas instalanaychu?',
-    a: 'Manam. Quinaqa celularniykipa navegadorninpim llamk’an, pantallaykiman app hina churawaqmi.',
-  },
 ];
 
+// En la portada lo responde la sección "Hecho para tu mostrador"; aquí se mantiene
+const installFaq: FaqItem = {
+  q: '¿Necesito instalar algo?',
+  a: 'No. Quina funciona desde el navegador de tu celular y puedes agregarla a tu pantalla de inicio como una app.',
+};
+
 export const faqGroups: { title: string; items: FaqItem[] }[] = [
-  { title: 'Empezar a usar Quina', items: homeFaq },
+  { title: 'Empezar a usar Quina', items: [...homeFaq, installFaq] },
   {
     title: 'Planes y pagos',
     items: [

@@ -99,6 +99,11 @@ const titleId = `${id}-title`;
     transition: rotate 350ms var(--ease-out-expo);
   }
 
+  /* El verde oscuro se pierde sobre la tarjeta antracita: en modo oscuro va el verde Quina */
+  :global([data-theme='dark'] .faq-icon) {
+    color: var(--color-primary);
+  }
+
   :global(.faq-item.is-open .faq-icon) {
     rotate: 45deg;
   }

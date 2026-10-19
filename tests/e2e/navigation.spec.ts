@@ -85,3 +85,84 @@ test('el menú móvil abre y cierra', async ({ page, isMobile }) => {
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-menu]')).not.toHaveAttribute('data-open', '');
 });
+
+test('el plan de la calculadora lleva a su tarjeta y la marca', async ({ page }) => {
+  await page.goto('/');
+  // Con los valores iniciales (40 vecinos) la calculadora recomienda Bodega Pro
+  const link = page.locator('.calc-plan-link');
+  await link.scrollIntoViewIfNeeded();
+  await expect(link).toHaveAttribute('href', '#plan-bodega-pro');
+  // La isla de planes se hidrata al verse: se pasa por ella antes de volver al enlace
+  await page.locator('#plan-bodega-pro').scrollIntoViewIfNeeded();
+  await expect(page.locator('.plans').locator('xpath=ancestor::astro-island')).not.toHaveAttribute(
+    'ssr',
+    '',
+  );
+  await link.scrollIntoViewIfNeeded();
+  await link.click();
+
+  const card = page.locator('#plan-bodega-pro');
+  await expect(card).toHaveClass(/is-picked/);
+  await expect(card).toBeFocused();
+  await expect(card.locator('.plan-picked')).toHaveText('Tu plan según la calculadora');
+  await expect(card).toBeInViewport();
+});
+
+test('desde la calculadora de recursos llega a /planes con el plan marcado', async ({ page }) => {
+  await page.goto('/recursos/calculadora');
+  const link = page.locator('.calc-plan-link');
+  await expect(link).toHaveAttribute('href', '/planes#plan-bodega-pro');
+  // La tarjeta de resultado entra con data-reveal: aparece al llegar a ella
+  await link.scrollIntoViewIfNeeded();
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page).toHaveURL(/\/planes#plan-bodega-pro$/);
+  await page.locator('#plan-bodega-pro').scrollIntoViewIfNeeded();
+  await expect(page.locator('#plan-bodega-pro')).toHaveClass(/is-picked/);
+});
+
+test('con 4 o más personas que atienden la calculadora recomienda Negocio Plus', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const team = page.locator('.calc-team');
+  await team.scrollIntoViewIfNeeded();
+  // La isla se hidrata al verse: antes de eso el control no reacciona
+  await expect(page.locator('.calc').locator('xpath=ancestor::astro-island')).not.toHaveAttribute(
+    'ssr',
+    '',
+  );
+  const link = page.locator('.calc-plan-link');
+
+  // Solo el dueño y 40 vecinos: Bodega Pro por la plata en la calle
+  await expect(team.getByRole('radio', { name: 'Solo yo' })).toBeChecked();
+  await expect(link).toHaveAttribute('href', '#plan-bodega-pro');
+
+  // Con 2 o 3 personas Casero ya no alcanza (1 usuario): Bodega Pro por el equipo
+  // El radio transparente cubre toda la píldora: se elige por su nombre accesible
+  await team.getByRole('radio', { name: '2 o 3' }).check();
+  await expect(page.locator('.calc-verdict')).toContainText('hasta 3 personas');
+  await expect(link).toHaveAttribute('href', '#plan-bodega-pro');
+
+  // Con 4 o más pasa el límite de Bodega Pro (3): Negocio Plus
+  await team.getByRole('radio', { name: '4 o más' }).check();
+  await expect(team.getByRole('radio', { name: '4 o más' })).toBeChecked();
+  await expect(link).toHaveAttribute('href', '#plan-negocio-plus');
+  await expect(link).toContainText('Negocio Plus');
+});
+
+test('si eligen el equipo antes de que cargue la calculadora, se respeta al cargar', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const island = page.locator('.calc').locator('xpath=ancestor::astro-island');
+  // Aún sin verse en pantalla: la isla no se hidrata y el radio es HTML puro
+  await expect(island).toHaveAttribute('ssr', '');
+  await page
+    .locator('.calc-team input[value="large"]')
+    .evaluate((el: HTMLInputElement) => el.click());
+
+  await page.locator('.calc-team').scrollIntoViewIfNeeded();
+  await expect(island).not.toHaveAttribute('ssr', '');
+  await expect(page.locator('.calc-plan-link')).toHaveAttribute('href', '#plan-negocio-plus');
+});
