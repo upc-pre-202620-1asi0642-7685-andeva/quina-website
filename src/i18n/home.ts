@@ -149,6 +149,25 @@ export const home = {
         },
       ],
     },
+    devices: {
+      id: 'donde-usarla',
+      title: 'Hecho para tu mostrador',
+      lead: 'Quina va donde tú estás: en el celular mientras atiendes y en la compu cuando cierras.',
+      items: [
+        {
+          title: 'En la compu',
+          text: 'Cuando cierras, revisas cortes, reportes y stock con calma y en pantalla grande.',
+        },
+        { title: 'En el celular', text: 'Fías en tres toques mientras atiendes la cola.' },
+        {
+          title: 'En tu pantalla de inicio',
+          text: 'La agregas desde el navegador, como una app. Sin tienda de apps.',
+        },
+      ],
+      url: 'quina.andeva.tech',
+      install: 'Agregar a inicio',
+      note: 'En Bodega Pro, hasta 3 personas de tu tienda con su propio acceso.',
+    },
     calc: {
       title: '¿Cuánta plata tienes en la calle?',
       lead: 'Mueve los números con los de tu negocio. La cuenta es tuya, no la guardamos.',
@@ -307,6 +326,28 @@ export const home = {
           text: 'At closing it builds their statement and reminds them to pay. You just get paid.',
         },
       ],
+    },
+    devices: {
+      id: 'where-to-use',
+      title: 'Made for your counter',
+      lead: 'Quina goes where you are: on your phone while you serve customers and on the computer after closing.',
+      items: [
+        {
+          title: 'On the computer',
+          text: 'After closing, review statements, reports and stock calmly on a big screen.',
+        },
+        {
+          title: 'On your phone',
+          text: 'Record credit sales in three taps while you serve the line.',
+        },
+        {
+          title: 'On your home screen',
+          text: 'Add it from the browser, like an app. No app store needed.',
+        },
+      ],
+      url: 'quina.andeva.tech',
+      install: 'Add to home',
+      note: 'On Bodega Pro, up to 3 people from your shop, each with their own login.',
     },
     calc: {
       title: 'How much money is out on credit?',
@@ -474,6 +515,25 @@ export const home = {
           text: 'Cortepi estado de cuentanta ruwan, pagananta yuyarichin. Qamqa chaskillankim.',
         },
       ],
+    },
+    devices: {
+      id: 'maypi',
+      title: 'Mostradorniykipaq ruwasqa',
+      lead: 'Quinaqa maypichus kanki chaypim: celularpi atiendespa, computadorapi wichqaspa.',
+      items: [
+        {
+          title: 'Computadorapi',
+          text: 'Wichqaspa, cortekunata, reportekunata, stocktapas hatun pantallapi hawkalla qhawanki.',
+        },
+        { title: 'Celularpi', text: 'Kimsa toqellapi manukuyta qillqanki, colata atiendespa.' },
+        {
+          title: 'Pantalla de inicioykipi',
+          text: 'Navegadormanta app hina yapanki. Mana app tiendayuq.',
+        },
+      ],
+      url: 'quina.andeva.tech',
+      install: 'Inicioman yapay',
+      note: 'Bodega Pro nisqapi, tiendaykimanta 3 runakama, sapanka accesonwan.',
     },
     calc: {
       title: '¿Hayk’a qullqiykitaq callepi kachkan?',
