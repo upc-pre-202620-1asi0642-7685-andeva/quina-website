@@ -11,7 +11,7 @@ cumple los criterios **INVEST** (Independiente, Negociable, Valiosa, Estimable,
 Pequeña y Testeable) y se articula con la
 [priorización de características](feature-prioritization.md), la
 [estrategia de precios](pricing-strategy.md) y la
-[arquitectura webapp](webapp-documentation/quina-webapp-documentation.md).
+[arquitectura webapp](quina-webapp-documentation.md).
 
 ---
 
@@ -34,18 +34,18 @@ principales:
 
 ## 2. Mapa general de Sprints y Épicas
 
-Las 23 historias de usuario se distribuyen en cinco Sprints de desarrollo:
+Las 27 historias de usuario se distribuyen en cinco Sprints de desarrollo:
 
 ```
-[ Sprint 1: Cimientos y Seguridad ] ──► Multi-tenant, Login seguro Turnstile, Catálogo dual, Clientes Ley 29733, RBAC
+[ Sprint 1: Cimientos y Seguridad ] ──► Multi-tenant, Registro autoservicio, Login seguro Turnstile, Idiomas, Catálogo dual, Clientes Ley 29733, RBAC
                │
 [ Sprint 2: Ventas y Finanzas ] ──────► Condiciones de crédito, Venta al contado, Despacho fiado 3 toques, Método Francés
                │
-[ Sprint 3: Corte y Cobranza ] ───────► Liquidación mensual, Avisos de cargo 48h, Recordatorios preventivos, Mora, Portal Vecino
+[ Sprint 3: Corte y Cobranza ] ───────► Liquidación mensual, Resumen diario de cargos 48h, Recordatorios preventivos, Mora, Portal Vecino
                │
 [ Sprint 4: Inventario y Auditoría ] ─► Compras con facturas en Supabase, Kardex costo promedio, Stock mínimo, Bitácora de auditoría
                │
-[ Sprint 5: Analítica, PWA y SaaS ] ──► Panel de cartera, Reportes con IA Groq, Asistente Nuevo RUS, PWA offline, Mercado Pago
+[ Sprint 5: Analítica, PWA y SaaS ] ──► Panel de cartera, Reportes con IA Groq, Asistente Nuevo RUS, PWA offline, Mercado Pago, Prueba Pro, Límites de plan
 ```
 
 ---
@@ -67,13 +67,16 @@ Cada tienda debe crearse como un inquilino independiente (_tenant_). Los datos
 incluyen nombre comercial, giro de negocio (bodega, botica, carnicería), RUC o
 DNI del dueño, correo de contacto y dirección física. El sistema debe asociar un
 identificador único inmutable `store_id` que se inyectará en todas las consultas
-de la base de datos para garantizar aislamiento estricto de información.
+de la base de datos para garantizar aislamiento estricto de información. Esta
+vía la exige el enunciado del curso y convive con el registro autoservicio del
+comerciante (US24), que es el que promete el sitio público.
 
 **Criterios de Aceptación (Confirmation):**
 1. El formulario de alta valida campos obligatorios: nombre comercial, documento de
    identidad (RUC de 11 dígitos o DNI de 8 dígitos) y correo electrónico válido.
 2. Al crearse la tienda, se genera automáticamente la cuenta del usuario dueño con
-   rol `STORE_OWNER` y contraseña temporal segura enviada por correo.
+   rol `STORE_OWNER` y se le envía por correo un enlace de un solo uso para que
+   defina su propia contraseña (nunca se envía una contraseña por correo).
 3. El sistema asigna un `store_id` único y crea el registro de suscripción inicial
    en el plan gratuito (Plan Casero).
 4. No se permite registrar dos tiendas con el mismo RUC o correo de administrador.
@@ -94,9 +97,10 @@ de la base de datos para garantizar aislamiento estricto de información.
 > **para que** mi cuenta esté blindada contra accesos no autorizados y ataques automatizados sin complicaciones.
 
 **Conversación (Conversation):**
-Cumple estrictamente con el requisito de autenticación segura del enunciado.
-Soporta dos modalidades de acceso: credenciales tradicionales (correo y contraseña
-segura con Argon2id) y acceso federado con Google OAuth 2.0 en un solo toque.
+Cumple estrictamente con el requisito de autenticación segura del enunciado y se
+construye con **Better Auth**. Soporta dos modalidades de acceso: credenciales
+tradicionales (correo y contraseña segura con Argon2id) y acceso federado con
+Google OAuth 2.0 en un solo toque.
 Incluye verificación de correo con código OTP de 6 dígitos numéricos, protección
 contra bots con Cloudflare Turnstile (100 % gratuito y no intrusivo), política
 anti-fuerza bruta con bloqueo automático temporal tras 5 fallos consecutivos y
@@ -115,9 +119,10 @@ recuperación de contraseña mediante enlace tokenizado de un solo uso.
    automáticamente durante 15 minutos (`locked_until`) y se le notifica por correo.
 5. El flujo *"Olvidé mi contraseña"* genera un token criptográfico seguro de un solo
    uso con expiración de 30 minutos enviado por correo, dirigiendo a
-   `/auth/reset-password?token=...` sin revelar si el correo existe o no en el sistema.
-6. La sesión emite un token JWT en cookie `HttpOnly`, `SameSite=Lax` y `Secure`, y
-   el cierre de sesión invalida la cookie inmediatamente.
+   `/app/auth/reset-password?token=...` sin revelar si el correo existe o no en el sistema.
+6. La sesión se guarda en la tabla `sessions` y viaja en una cookie `HttpOnly`,
+   `SameSite=Lax` y `Secure`; el cierre de sesión borra la sesión en el servidor y
+   la cookie deja de ser válida de inmediato.
 
 ---
 
@@ -149,7 +154,8 @@ histórico con el que se despacharon y cada cambio queda en
    el precio anterior, el nuevo precio, la fecha y el usuario en el historial.
 5. Las ventas registradas previamente no modifican su subtotal ante cambios
    posteriores en el catálogo.
-6. El sistema alerta visualmente si el precio al crédito es menor que el de contado.
+6. Rechaza con un mensaje claro un precio al crédito menor que el de contado (la
+   base de datos también lo impide con `CHECK (credit_price >= cash_price)`).
 
 ---
 
@@ -165,20 +171,22 @@ histórico con el que se despacharon y cada cambio queda en
 
 **Conversación (Conversation):**
 Para cumplir con la Ley N.° 29733 y los requisitos de la rúbrica, el registro del
-cliente recaba nombre completo, DNI, dirección, teléfono celular y correo
+cliente recaba nombre completo, documento de identidad (DNI, carné de
+extranjería o pasaporte), dirección, teléfono celular y correo
 electrónico. El sistema presenta una casilla obligatoria de consentimiento
 informado donde se deja constancia digital de la autorización del vecino para la
 gestión de su cuenta corriente.
 
 **Criterios de Aceptación (Confirmation):**
-1. El registro exige DNI válido (8 dígitos numéricos), nombres, apellidos, teléfono
+1. El registro exige documento de identidad válido (DNI de 8 dígitos, carné de
+   extranjería o pasaporte), nombres, apellidos, teléfono
    móvil y correo electrónico.
 2. Muestra un enlace legible a la Política de Privacidad adaptada al comercio.
 3. El botón de guardado permanece deshabilitado hasta marcar la casilla de
    consentimiento expreso.
 4. La base de datos guarda la fecha exacta, hora y versión de la política en la
    tabla de auditoría de consentimiento.
-5. No permite registrar dos clientes con el mismo DNI dentro de la misma tienda.
+5. No permite registrar dos clientes con el mismo documento dentro de la misma tienda.
 6. Se envía un correo de bienvenida automático al vecino informándole de su registro.
 
 ---
@@ -200,7 +208,7 @@ ganancias o acceda a la configuración tributaria. El sistema implementa RBAC co
 roles `STORE_OWNER` y `STORE_EMPLOYEE`.
 
 **Criterios de Aceptación (Confirmation):**
-1. El dueño puede invitar a un nuevo empleado ingresando su nombre, DNI y correo.
+1. El dueño puede invitar a un nuevo empleado ingresando su nombre y correo.
 2. El rol `STORE_EMPLOYEE` tiene permisos habilitados para: registrar ventas, buscar
    clientes, consultar stock disponible y registrar pagos de clientes.
 3. El rol `STORE_EMPLOYEE` tiene bloqueado el acceso a: reportes financieros,
@@ -209,6 +217,70 @@ roles `STORE_OWNER` y `STORE_EMPLOYEE`.
    cualquier mutación protegida.
 5. El dueño puede desactivar la cuenta de un empleado en cualquier momento.
 6. Cada venta registrada guarda el ID del empleado que atendió para auditoría.
+
+---
+
+### US24: Registro autoservicio del comerciante en dos minutos
+- **Épica:** Identidad y Configuración.
+- **Prioridad:** Must Have.
+- **Estimación:** 5 Story Points.
+
+**Tarjeta (Card):**
+> **Como** Dueño del Negocio,  
+> **quiero** registrar mi bodega por mi cuenta en menos de dos minutos y sin tarjeta,  
+> **para que** pueda empezar a fiar con Quina hoy mismo sin esperar a nadie.
+
+**Conversación (Conversation):**
+El sitio público promete *"Empieza gratis con tus primeros 15 vecinos. Sin
+tarjeta y en dos minutos"* y todos sus botones llevan a `/app/register`. Don
+Lucho entra desde ahí, crea su cuenta con correo o con Google y completa los
+datos mínimos de su tienda. El sistema crea la tienda, su usuario dueño y la
+suscripción con la prueba Pro de 14 días (US25). El alta por el Administrador
+de Plataforma (US01) se mantiene para los casos que exige el enunciado.
+
+**Criterios de Aceptación (Confirmation):**
+1. La pantalla `/app/register` pide nombre, correo, contraseña segura, nombre
+   comercial, giro del negocio y RUC (11 dígitos) o DNI (8 dígitos); también
+   permite empezar con **"Continuar con Google"** y luego completar la tienda.
+2. El formulario está protegido con Cloudflare Turnstile y límite de tasa.
+3. El correo se verifica con un código OTP de 6 dígitos antes de operar (US02).
+4. En una sola transacción crea la tienda, el usuario `STORE_OWNER`, la
+   suscripción en prueba (US25), las unidades de medida básicas (UND, KG, LTR) y
+   el registro de auditoría.
+5. No pide tarjeta ni ningún dato de pago.
+6. Rechaza con un mensaje claro un RUC/DNI o un correo ya registrados.
+7. El recorrido completo, desde abrir el formulario hasta ver el mostrador
+   listo, toma menos de dos minutos en las pruebas de usabilidad.
+
+---
+
+### US27: Interfaz y correos en castellano, inglés y quechua
+- **Épica:** Experiencia de Usuario.
+- **Prioridad:** Should Have.
+- **Estimación:** 3 Story Points.
+
+**Tarjeta (Card):**
+> **Como** Usuario del Sistema (Dueño, Empleado o Cliente),  
+> **quiero** usar Quina en castellano, inglés o quechua,  
+> **para que** entienda cada pantalla y cada correo en mi idioma.
+
+**Conversación (Conversation):**
+El sitio público ya ofrece los tres idiomas y guarda la elección en la cookie
+`quina-lang`, que comparte el dominio con la webapp. La webapp continúa esa
+elección sin pedirla de nuevo. El idioma no forma parte de la URL.
+
+**Criterios de Aceptación (Confirmation):**
+1. Todos los textos de interfaz viven en archivos de mensajes (`es`, `en`, `qu`);
+   ninguno queda escrito directamente en los componentes.
+2. En el primer ingreso se usa el idioma de la cookie `quina-lang`; al registrarse
+   se guarda en `users.preferred_locale` y desde entonces manda la preferencia
+   del usuario.
+3. Un selector de idioma en el perfil cambia la preferencia y actualiza la cookie.
+4. Los correos a vecinos se redactan en su idioma o, si no lo tiene, en el idioma
+   por defecto de la tienda.
+5. Montos y fechas usan formato peruano (`S/`, `es-PE`) en cualquier idioma.
+6. Los textos en quechua quedan marcados como borrador pendiente de revisión por
+   un traductor nativo.
 
 ---
 
@@ -235,11 +307,13 @@ pactada, día del mes de corte (ej. día 20) y día del mes de pago pactado (ej.
 1. Permite seleccionar el tipo de tasa (Nominal o Efectiva) y el período de
    capitalización o vigencia (anual, mensual o diaria).
 2. Valida que las tasas no excedan los topes máximos vigentes publicados por el BCRP
-   para operaciones fuera del sistema financiero.
-3. El límite de crédito debe ser un número mayor o igual a cero.
+   para operaciones fuera del sistema financiero (tabla `credit_rate_caps`, que
+   mantiene el Administrador de Plataforma).
+3. El límite de crédito debe ser un número mayor que cero.
 4. Los días de corte y pago deben ser enteros entre 1 y 28.
 5. Permite configurar tasa compensatoria del 0 % para clientes de absoluta confianza.
-6. Los cambios en las condiciones crediticias solo aplican para compras futuras.
+6. Los cambios en las condiciones crediticias solo aplican para compras futuras:
+   cada cargo fiado guarda una copia de las condiciones vigentes al comprar.
 
 ---
 
@@ -266,7 +340,7 @@ stock de los productos en el kardex y registra el ingreso en la caja diaria.
 3. Permite ingresar el monto recibido en efectivo y calcula el vuelto en pantalla.
 4. Soporta registrar el medio de pago: Efectivo, Yape, Plin o Tarjeta.
 5. Descuenta de inmediato las unidades del stock físico registrando el movimiento en
-   el kardex (`SALIDA_VENTA`).
+   el kardex (`SALE_EXIT`).
 6. Si algún producto no cuenta con stock suficiente, la venta no se procesa.
 
 ---
@@ -286,6 +360,9 @@ En horas punta, se selecciona al cliente vecino, se agregan los productos y se
 confirma en 3 toques. El sistema ejecuta una transacción ACID que: 1) verifica
 stock, 2) verifica que no supere el crédito disponible (`límite - deuda_actual`),
 3) descuenta stock y 4) asienta la venta al precio de crédito (`credit_price`).
+La `deuda_actual` es el capital de los cargos de pago único sin pagar, más el
+capital pendiente de las cuotas (sin intereses futuros), más los intereses ya
+liquidados sin pagar (`credit_accounts.current_balance`).
 
 **Criterios de Aceptación (Confirmation):**
 1. El flujo de selección de cliente, productos y confirmación se completa en un
@@ -297,6 +374,10 @@ stock, 2) verifica que no supere el crédito disponible (`límite - deuda_actual
 4. Aplica el precio de lista al crédito (`credit_price`) de cada producto.
 5. Al confirmar, muestra un toast de Sileo y actualiza la deuda mediante UI optimista.
 6. Congela el costo promedio vigente (`unit_cost_snapshot`) en cada ítem vendido.
+7. Crea el cargo fiado (`credit_charges`) con una copia de las tasas pactadas y lo
+   asigna al ciclo que corresponde según la fecha de corte.
+8. Si el vecino tiene un ciclo vencido (`OVERDUE`), el mostrador bloquea la venta
+   al crédito y explica el motivo; el fiado se reabre en cuanto paga ese ciclo.
 
 ---
 
@@ -318,11 +399,22 @@ compensatoria por esos 11 días antes de calcular la cuota fija mensual. El
 cronograma arranca en el mes siguiente (26 de octubre, 26 de noviembre y 26 de
 diciembre), bajo año comercial de 360 días y meses base de 30 días.
 
+El enunciado no cubre la compra en cuotas hecha **después** del corte. Se
+resuelve con su punto 5: esa compra pertenece al ciclo siguiente. Con el mismo
+corte (día 20) y pago (día 26), una compra a 3 meses del 22 de setiembre entra
+al ciclo que cierra el 20 de octubre y se paga el 26 de octubre. El período de
+gracia total va del 22 de setiembre al 26 de octubre: 34 días (8 de setiembre,
+con meses de 30 días, más 26 de octubre). La deuda se capitaliza por esos 34
+días y las cuotas vencen el 26 de noviembre, el 26 de diciembre y el 26 de
+enero.
+
 **Criterios de Aceptación (Confirmation):**
-1. Calcula los días exactos entre la fecha de compra y la fecha de pago pactada del
-   ciclo corriente como período de gracia total.
-2. Capitaliza el saldo principal mediante la fórmula financiera correspondiente
-   según sea tasa efectiva o nominal.
+1. Calcula, en base comercial 30/360, los días entre la fecha de compra y la fecha
+   de pago pactada del ciclo al que pertenece la compra (según la fecha de corte)
+   como período de gracia total.
+2. Capitaliza el saldo principal con la tasa diaria $i_d = (1+TEA)^{1/360} - 1$. Si
+   la tasa pactada es nominal, primero la convierte a TEA con su capitalización:
+   $TEA = (1 + TNA/m)^m - 1$. La cuota usa $i = TEM = (1+TEA)^{30/360} - 1$.
 3. Calcula la cuota periódica uniforme usando la fórmula del método francés
    vencido: $R = S_{cap} \times \left[ \frac{i \times (1+i)^m}{(1+i)^m - 1} \right]$.
 4. Genera la tabla de amortización detallando: número de cuota, fecha de vencimiento,
@@ -330,6 +422,9 @@ diciembre), bajo año comercial de 360 días y meses base de 30 días.
 5. La suma de las amortizaciones coincide exactamente con el capital capitalizado
    (tolerancia de redondeo $\pm$ 0.01 soles).
 6. El cronograma queda grabado y visible para el dueño y para el cliente.
+7. Los dos ejemplos de la conversación (compra antes del corte: 11 días de
+   gracia y cuotas desde octubre; compra después del corte: 34 días de gracia y
+   cuotas desde noviembre) tienen su prueba unitaria.
 
 ---
 
@@ -352,45 +447,59 @@ días transcurridos entre cada compra y la fecha de pago. Las compras hechas des
 de la fecha de corte se postergan automáticamente para el siguiente ciclo.
 
 **Criterios de Aceptación (Confirmation):**
-1. En la fecha de corte, agrupa todas las compras realizadas antes de la hora límite
-   del día de corte.
+1. En la fecha de corte, agrupa todas las compras realizadas hasta las 23:59:59
+   (hora de Lima) del día de corte.
 2. Calcula los intereses individuales aplicando la tasa pactada por los días entre la
    compra y la fecha de pago pactada.
 3. Incorpora las cuotas del mes para compras financiadas bajo el método francés.
 4. Genera el documento de liquidación consolidando: lista de compras por fecha,
-   intereses compensatorios, cuotas del mes y total a pagar.
+   intereses compensatorios, cuotas del mes, cargos anulados descontados y total
+   a pagar.
 5. Compras con fecha posterior al corte se excluyen y se asignan al siguiente ciclo.
-6. El estado de la cuenta del cliente pasa a `LIQUIDADO_PENDIENTE_PAGO`.
+6. El ciclo del cliente pasa a estado `BILLED` (liquidado, pendiente de pago) y se
+   envía el estado de cuenta por correo.
+7. Si en el periodo vence una cuota aunque el vecino no haya comprado nada, el
+   corte crea y liquida igual su ciclo.
 
 ---
 
-### US11: Notificación de cargos por correo con conformidad liviana de 48 horas
+### US11: Resumen diario de cargos por correo con conformidad liviana de 48 horas
 - **Épica:** Notificaciones y Respaldo Legal.
 - **Prioridad:** Must Have.
 - **Estimación:** 5 Story Points.
 
 **Tarjeta (Card):**
 > **Como** Dueño del Negocio,  
-> **quiero** que cada cargo fiado envíe un correo al vecino otorgándole 48 horas para observaciones,  
+> **quiero** que cada vecino reciba un resumen diario de sus cargos fiados con 48 horas para observaciones,  
 > **para que** la deuda quede reconocida automáticamente sin discusiones posteriores de "yo no saqué eso".
 
 **Conversación (Conversation):**
-Al registrarse una venta fiada, el sistema despacha un correo vía Resend con el
-desglose de productos, cantidades, fecha e importe. Indica que el cliente dispone
-de 48 horas para reportar cualquier discrepancia; transcurrido ese lapso sin
-reclamos, el cargo se considera aceptado de mutuo acuerdo.
+En lugar de un correo por cada venta, el proceso programado de cada mañana envía
+a cada vecino **un solo correo** con todas sus compras fiadas del día anterior:
+productos, cantidades, fecha, importe y saldo. Indica que dispone de 48 horas
+para reportar cualquier discrepancia; transcurrido ese lapso sin reclamos, los
+cargos se consideran aceptados de mutuo acuerdo. Agrupar los cargos evita
+saturar al vecino y mantiene el volumen dentro de la capa gratuita de Resend.
 
 **Criterios de Aceptación (Confirmation):**
-1. Tras registrar la venta al crédito, encola el envío asíncrono vía Resend sin
-   demorar la interfaz.
-2. El correo contiene: nombre del comercio, fecha/hora, productos adquiridos con
-   precios y saldo deudor acumulado.
-3. Incluye el texto legal de 48 horas para observaciones antes de considerarse
-   conforme de mutuo acuerdo.
-4. Si no se registra objeción en 48 horas, el estado del cargo pasa a
-   `CONFORME_TACITO`.
-5. Si el correo rebota, marca una alerta en la ficha del cliente en el sistema.
-6. Guarda registro inmutable del envío en la tabla de logs de notificación.
+1. Registrar una venta al crédito no envía ningún correo ni demora la interfaz; el
+   cargo queda pendiente de notificar.
+2. El proceso diario envía un único correo por vecino con los cargos del día
+   anterior: nombre del comercio, fecha/hora de cada compra, productos con precios
+   y saldo deudor acumulado.
+3. Incluye el texto legal de 48 horas para observaciones y un enlace directo al
+   portal para observar un cargo.
+4. Las 48 horas se cuentan desde el envío del resumen; si no hay objeción, el
+   cargo pasa a `ACCEPTED` (conforme tácito). Si el vecino lo observa, queda
+   `OBJECTED` con su motivo para que el dueño lo revise.
+7. El cargo observado sigue en su ciclo. Solo el dueño lo resuelve: lo confirma
+   (pasa a `ACCEPTED` con su nota) o lo anula. La anulación inserta una fila en
+   `credit_charge_voids`, devuelve los productos al stock (`CUSTOMER_RETURN`) y
+   descuenta el monto del ciclo abierto o, si ya se liquidó, del siguiente. Solo
+   se anulan cargos sin pagos registrados.
+5. Si el correo rebota, marca una alerta en la ficha del cliente
+   (`email_bounced_at`).
+6. Guarda cada envío en `notification_logs`, con un solo resumen por vecino y día.
 
 ---
 
@@ -417,7 +526,8 @@ amable y respetuoso (*"Estimada Doña Rosa, le recordamos que su fecha de pago e
    monto exacto a pagar.
 3. Incluye un enlace seguro directo al portal del cliente para revisar el desglose.
 4. No envía recordatorios a clientes cuya deuda haya sido cancelada anticipadamente.
-5. Registra el envío en el historial del cliente para evitar recordatorios duplicados.
+5. Registra el envío en `notification_logs`, que impide un segundo recordatorio
+   para el mismo ciclo.
 6. Permite al dueño consultar en una pantalla qué recordatorios fueron enviados hoy.
 
 ---
@@ -434,19 +544,28 @@ amable y respetuoso (*"Estimada Doña Rosa, le recordamos que su fecha de pago e
 
 **Conversación (Conversation):**
 El cliente acude a pagar. Si lo hace en o antes de la fecha pactada, paga el monto
-liquidado. Si paga con atraso, el sistema calcula los días de mora y aplica la tasa
-moratoria pactada sobre el saldo impago, desglosándola por separado en el recibo.
-No se permiten pagos parciales a la fecha de pago pactada.
+liquidado en el corte, sin recalcular. Si paga con atraso, el sistema calcula los
+días de mora y aplica la tasa moratoria pactada sobre el total exigible del ciclo
+vencido, desglosándola por separado en el recibo. Durante la mora no corre
+interés compensatorio. No se permiten pagos parciales a la fecha de pago pactada.
 
 **Criterios de Aceptación (Confirmation):**
 1. Si el pago se realiza dentro del plazo, no aplica recargos y cancela la deuda del
-   ciclo al 100 %.
-2. Si paga con atraso, calcula los días de mora: $días\_mora = fecha\_real - fecha\_pactada$.
-3. Aplica la tasa moratoria pactada y desglosa: *"Intereses moratorios por X días: S/ Y.YY"*.
-4. Rechaza cualquier intento de pago parcial, exigiendo la cancelación total a la fecha.
-5. Al registrarse el pago, el saldo deudor se reduce a cero, liberando la línea de
-   crédito.
+   ciclo al 100 %, por el monto liquidado en el corte (sin recalcular intereses).
+2. Si paga con atraso, calcula los días de mora en base comercial 30/360:
+   $días\_mora = fecha\_real - fecha\_pactada$.
+3. Aplica la tasa moratoria pactada sobre el total exigible del ciclo vencido (las
+   cuotas futuras no entran) y desglosa: *"Intereses moratorios por X días: S/ Y.YY"*.
+4. Rechaza cualquier intento de pago parcial y cualquier pago de un ciclo todavía
+   abierto (`OPEN`): solo se pagan ciclos `BILLED` u `OVERDUE`, completos.
+5. Al registrarse el pago, el saldo deudor baja en lo cancelado: el capital de los
+   cargos de pago único, el capital de las cuotas del mes y los intereses pagados.
+   El capital de las cuotas futuras sigue ocupando la línea de crédito.
 6. Emite comprobante digital de cancelación despachado por correo al vecino.
+7. Detalla en `payment_allocations` qué cargos, cuotas e intereses cancela el
+   pago, y marca como pagadas las cuotas francesas del mes.
+8. Si el vecino tiene varios ciclos vencidos, cada pago cancela uno completo,
+   empezando por el más antiguo.
 
 ---
 
@@ -474,18 +593,24 @@ pago de su casero (número de Yape o cuenta bancaria).
 1. El acceso al portal del vecino es 100 % gratuito y no solicita tarjetas bancarias
    ni requiere instalar una aplicación obligatoria.
 2. Permite acceso directo de un solo clic mediante **Magic Link** temporal (72 horas)
-   enviado en los correos de compra y corte mensual.
+   enviado en el resumen diario de cargos y en el aviso de corte mensual.
 3. Permite acceso en un toque con **"Continuar con Google"** (OAuth 2.0) si el correo
    coincide con el registrado por la tienda.
 4. Permite acceso sin contraseña ingresando el **DNI** del cliente y validando un
-   **código OTP** de 6 dígitos despachado a su correo electrónico.
+   **código OTP** de 6 dígitos despachado a su correo electrónico. Si el DNI está
+   registrado en varias tiendas con correos distintos, se envía un código a cada
+   correo y la pantalla responde siempre lo mismo, sin revelar tiendas ni correos.
+   Al ingresar, el vecino ve solo las cuentas de las tiendas que tienen el correo
+   con el que validó.
 5. Permite opcionalmente crear una contraseña personalizada permanente si el vecino
    prefiere el método tradicional.
 6. La pantalla móvil destaca en formato legible: saldo actual, fecha de corte, fecha
-   límite de pago, botón para ver comprobantes de compras y datos de Yape de la bodega.
+   límite de pago, botón para ver comprobantes de compras y los datos de cobro que
+   configuró la bodega (Yape, Plin, cuenta bancaria o QR).
 7. Para compras en cuotas, presenta la tabla francesa con cuotas canceladas y cuotas
    futuras por vencer con desglose de amortización e intereses.
-8. Datos transmitidos mediante conexión cifrada HTTPS/TLS gestionada por Cloudflare.
+8. Datos transmitidos mediante conexión cifrada HTTPS/TLS.
+9. Permite observar un cargo dentro de su plazo de 48 horas indicando el motivo.
 
 ---
 
@@ -535,8 +660,8 @@ registro del kardex puede ser editado o eliminado; correcciones se procesan
 mediante mermas o ajustes de conteo físico.
 
 **Criterios de Aceptación (Confirmation):**
-1. Cada compra aprobada recalcula automáticamente el `avg_cost` del producto.
-2. Salidas por venta reducen stock registrando `SALIDA_VENTA` con el costo vigente.
+1. Cada compra aprobada recalcula automáticamente el `current_average_cost` del producto.
+2. Salidas por venta reducen stock registrando `SALE_EXIT` con el costo vigente.
 3. Prohíbe la modificación o eliminación directa de registros en `inventory_movements`.
 4. El módulo de mermas permite registrar productos dañados o vencidos con motivo
    obligatorio.
@@ -556,19 +681,20 @@ mediante mermas o ajustes de conteo físico.
 > **para que** pueda reponer mercadería a tiempo con mis proveedores antes de que se agote.
 
 **Conversación (Conversation):**
-En la ficha del producto se fija un umbral de `stock_min`. Cuando una venta reduce
+En la ficha del producto se fija un umbral de `minimum_stock`. Cuando una venta reduce
 las existencias por debajo de ese número, el sistema destaca el producto en color
 de advertencia y lo agrupa en una lista de reposición sugerida para el próximo
 pedido.
 
 **Criterios de Aceptación (Confirmation):**
-1. Permite configurar el valor numérico de `stock_min` en cada producto.
-2. Cuando `stock_current <= stock_min`, muestra un badge visual de alerta en catálogo
+1. Permite configurar el valor numérico de `minimum_stock` en cada producto.
+2. Cuando `current_stock <= minimum_stock`, muestra un badge visual de alerta en catálogo
    y mostrador.
 3. La barra superior muestra un contador con productos en estado crítico de reposición.
 4. Permite filtrar el catálogo en un clic para ver únicamente productos bajo mínimo.
-5. Ofrece un botón para agregar automáticamente los productos bajo mínimo al pedido
-   de compra en borrador.
+5. Ofrece un botón para agregar automáticamente los productos bajo mínimo a un
+   pedido de compra en borrador (`purchase_orders`), agrupado por su proveedor
+   habitual.
 6. Los servicios quedan exentos de alertas de stock mínimo.
 
 ---
@@ -591,8 +717,8 @@ en la tabla `audit_logs` con usuario, fecha, IP y valores antes/después.
 
 **Criterios de Aceptación (Confirmation):**
 1. La tabla `audit_logs` registra de forma automática e inmutable: `id`, `store_id`,
-   `user_id`, `action`, `entity_name`, `entity_id`, `old_values`, `new_values`, `timestamp`.
-2. Prohíbe mediante restricciones de base de datos operaciones de `UPDATE` o `DELETE`
+   `user_id`, `action`, `entity_name`, `entity_id`, `old_data`, `new_data`, `created_at`.
+2. Prohíbe mediante un trigger de base de datos operaciones de `UPDATE` o `DELETE`
    sobre la tabla de auditoría (solo inserción).
 3. Permite al dueño filtrar la bitácora por fecha, usuario (ej. ventas hechas por el
    cajero Brayan) o entidad.
@@ -617,14 +743,14 @@ en la tabla `audit_logs` con usuario, fecha, IP y valores antes/después.
 
 **Conversación (Conversation):**
 Responde cuánta plata está en la calle y quién es buen o mal pagador. El sistema
-calcula un puntaje de 1 a 100 basado en pagos puntuales frente a días de mora,
+calcula un puntaje de 0 a 100 basado en pagos puntuales frente a días de mora,
 clasificando a los clientes en categorías: Verde (Excelente), Amarillo (En riesgo)
 y Rojo (Moroso crítico).
 
 **Criterios de Aceptación (Confirmation):**
 1. Muestra cuatro métricas clave: Capital Prestado, Total Vencido en Mora, Proyección
    de Cobros del Mes y Clientes Morosos Activos.
-2. Cada cliente muestra un indicador visual de puntaje de 1 a 100 calculado
+2. Cada cliente muestra un indicador visual de puntaje de 0 a 100 calculado
    automáticamente.
 3. Descuenta puntos por cada día de mora incurrido en los últimos 6 meses y premia
    cancelaciones en fecha pactada.
@@ -681,7 +807,8 @@ preventiva para que el comerciante administre sus ventas. Es puramente informati
 
 **Criterios de Aceptación (Confirmation):**
 1. Permite seleccionar la categoría tributaria del Nuevo RUS en la configuración.
-2. Montos límites de cada categoría configurables desde la administración del sistema.
+2. Montos límites de cada categoría configurables desde la administración del sistema
+   (tabla `rus_categories`).
 3. Barra de progreso que compara ventas totales del mes contra el límite de la
    categoría.
 4. Al superar el 85 % del tope mensual, activa alerta visual preventiva en pantalla.
@@ -730,25 +857,94 @@ almacenan en caché para lectura rápida en caso de intermitencia celular.
 
 **Tarjeta (Card):**
 > **Como** Dueño del Negocio,  
-> **quiero** suscribirme al Plan Bodega Pro mediante Mercado Pago pagando con tarjeta o Yape en soles,  
+> **quiero** suscribirme al Plan Bodega Pro o Negocio Plus mediante Mercado Pago pagando en soles,  
 > **para que** active clientes de crédito ilimitados, múltiples usuarios y almacenamiento de comprobantes.
 
 **Conversación (Conversation):**
 Cuando el comerciante supera los 15 clientes del Plan Casero gratuito o desea
 habilitar el kardex avanzado y recomendaciones de IA, ingresa a la sección de
-planes y selecciona el Plan Bodega Pro (S/ 29/mes o S/ 279/año). Paga mediante
-Mercado Pago y su cuenta se actualiza automáticamente a Pro.
+planes y selecciona el Plan Bodega Pro (S/ 29/mes o S/ 279/año) o Negocio Plus
+(S/ 69/mes o S/ 660/año). Paga mediante Mercado Pago y su cuenta se actualiza
+automáticamente. La suscripción recurrente se cobra con tarjeta: Yape no admite
+cobros automáticos, así que solo se ofrece para un pago único del plan anual.
 
 **Criterios de Aceptación (Confirmation):**
 1. Muestra con transparencia los planes: Plan Casero (Gratis), Plan Bodega Pro
-   (S/ 29/mes) y Plan Negocio Plus (S/ 69/mes).
+   (S/ 29/mes o S/ 279/año) y Plan Negocio Plus (S/ 69/mes o S/ 660/año).
 2. Checkout seguro de Mercado Pago con soporte de tarjetas peruanas y billeteras.
 3. Webhook de Mercado Pago procesa la notificación de pago exitoso de forma
-   idempotente, actualizando el plan en Supabase PostgreSQL.
+   idempotente (`subscription_payments.mp_payment_id` único), actualizando el plan.
 4. Si el pago falla, otorga período de gracia de 5 días hábiles notificando por correo.
 5. Permite descargar comprobantes de pago de la suscripción desde el panel.
 6. Permite cancelar la renovación automática conservando funciones Pro hasta el fin
    del ciclo.
+
+---
+
+### US25: Prueba gratuita de Bodega Pro por 14 días
+- **Épica:** Facturación y Monetización B2B.
+- **Prioridad:** Should Have.
+- **Estimación:** 3 Story Points.
+
+**Tarjeta (Card):**
+> **Como** Dueño del Negocio,  
+> **quiero** probar gratis las funciones de Bodega Pro durante 14 días al registrarme,  
+> **para que** decida con mi propia bodega si vale la pena pagar.
+
+**Conversación (Conversation):**
+La estrategia de precios define que cada tienda nueva recibe 14 días de Bodega
+Pro sin tarjeta, y el sitio lo anuncia en el botón *"Prueba Pro 14 días"*. Al
+terminar, si no se suscribe, la tienda vuelve al Plan Casero sin perder nada de
+lo registrado.
+
+**Criterios de Aceptación (Confirmation):**
+1. Al registrarse (US24), la suscripción queda en estado `TRIALING` con el plan
+   `BODEGA_PRO` y `trial_ends_at` a 14 días.
+2. Un aviso visible en el panel muestra los días que quedan de prueba.
+3. Tres días antes del fin se envía un correo invitando a suscribirse (US23).
+4. Al vencer sin pago, el proceso diario deja la tienda en `CASERO` con estado
+   `ACTIVE`.
+5. Terminar la prueba nunca borra datos: lo que exceda el Plan Casero queda en
+   solo lectura según US26.
+6. Cada tienda tiene una sola prueba: no se reinicia al volver a registrarse con
+   el mismo RUC o DNI.
+
+---
+
+### US26: Límites de cada plan y avisos para subir de plan
+- **Épica:** Facturación y Monetización B2B.
+- **Prioridad:** Must Have.
+- **Estimación:** 5 Story Points.
+
+**Tarjeta (Card):**
+> **Como** Dueño del Negocio,  
+> **quiero** que Quina me avise con claridad cuando llego al límite de mi plan,  
+> **para que** sepa cuándo me conviene subir de plan sin perder lo que ya registré.
+
+**Conversación (Conversation):**
+Los límites salen de la [estrategia de precios](pricing-strategy.md): el Plan
+Casero admite 15 vecinos con crédito activo, 50 productos y 1 usuario, con avisos
+por correo manuales; Bodega Pro quita los límites de vecinos y productos, admite
+hasta 3 usuarios, 50 comprobantes al mes, avisos automáticos y 20 consultas de IA;
+Negocio Plus admite usuarios y comprobantes ilimitados y 100 consultas de IA.
+
+**Criterios de Aceptación (Confirmation):**
+1. Los límites de cada plan están definidos en un solo lugar del código y
+   coinciden con la estrategia de precios.
+2. Al intentar superar un límite (vecino 16, producto 51 o segundo usuario en
+   Casero; cuarto usuario en Bodega Pro), la acción se bloquea con un mensaje
+   claro y un botón para ver los planes.
+3. El límite de vecinos cuenta solo cuentas de crédito activas.
+4. La configuración muestra el uso actual frente al límite del plan.
+5. Las funciones que el plan no incluye (comprobantes, kardex con costo promedio,
+   reportes Excel/PDF, IA) se muestran bloqueadas indicando el plan que las
+   habilita.
+6. En el Plan Casero el resumen de cargos y los recordatorios se envían con un
+   botón (avisos manuales); en Bodega Pro y Negocio Plus los envía el proceso
+   diario.
+7. Bajar de plan o terminar la prueba nunca borra datos: lo que exceda queda en
+   solo lectura hasta que el dueño ajuste o vuelva a subir de plan.
+8. Los límites se validan en el servidor (Server Actions), no solo en la interfaz.
 
 ---
 
@@ -757,6 +953,8 @@ Mercado Pago y su cuenta se actualiza automáticamente a Pro.
 | Característica en `quina-documentation.md` | Historias de Usuario de cobertura |
 | :--- | :--- |
 | **Gestión de tiendas (Multi-tenant)** | US01 |
+| **Registro autoservicio del comerciante** | US24 |
+| **Idiomas: castellano, inglés y quechua** | US27 |
 | **Autenticación segura y captcha Turnstile** | US02 |
 | **Catálogo de productos/servicios y precios duales** | US03 |
 | **Historial de cambios de precios (`product_price_history`)** | US03 |
@@ -768,7 +966,7 @@ Mercado Pago y su cuenta se actualiza automáticamente a Pro.
 | **Validación de límite de crédito no sobrepasado** | US08 |
 | **Método francés vencido ordinario con gracia capitalizada** | US09 |
 | **Liquidación en fecha de corte e interés compensatorio** | US10 |
-| **Notificación de cargos con conformidad liviana (48 h)** | US11 |
+| **Resumen diario de cargos con conformidad liviana (48 h)** | US11 |
 | **Recordatorios automáticos preventivos de pago** | US12 |
 | **Registro de pagos y liquidación de mora por atraso** | US13 |
 | **Portal gratuito de consulta para el vecino** | US14 |
@@ -781,3 +979,5 @@ Mercado Pago y su cuenta se actualiza automáticamente a Pro.
 | **Asistente tributario informativo del Nuevo RUS** | US21 |
 | **Aplicación instalable (PWA) y modo resiliente** | US22 |
 | **Suscripción SaaS del negocio con Mercado Pago** | US23 |
+| **Prueba Pro de 14 días** | US25 |
+| **Límites de cada plan** | US26 |
