@@ -8,7 +8,7 @@
 **What it does:** Quina es una aplicación web progresiva (PWA) multi-tienda que digitaliza y profesionaliza la cuenta corriente de los pequeños comercios de barrio. Permite registrar ventas al contado y al crédito, calcular intereses compensatorios y moratorios según métodos financieros formales, emitir liquidaciones en fechas de corte y controlar el inventario valorizado con kardex.  
 **Product category:** Software de gestión comercial y crédito para microcomercios (Micro-retail Credit & Ledger Management).  
 **Product type:** B2B SaaS Multi-tenant (Webapp / PWA).  
-**Business model:** Freemium B2B con suscripción recurrente. Gratuito para siempre para los vecinos/clientes; Plan Casero gratuito para comercios hasta 15 clientes con crédito, y Plan Bodega Pro a S/ 29 / mes (o S/ 279 / año) para créditos ilimitados, multiusuario e IA.
+**Business model:** Freemium B2B con suscripción recurrente. Gratuito para siempre para los vecinos/clientes; Plan Casero gratuito para comercios hasta 15 clientes con crédito, Plan Bodega Pro a S/ 29 / mes (o S/ 279 / año) para créditos ilimitados, hasta 3 usuarios, avisos automáticos e IA; y Plan Negocio Plus a S/ 69 / mes (o S/ 660 / año) para usuarios y comprobantes ilimitados y más consultas de IA. Cada tienda nueva empieza con 14 días de prueba de Bodega Pro, sin tarjeta.
 
 ## Target Audience
 **Target companies:** Micro y pequeños comercios de barrio en zonas urbanas y periurbanas del Perú: bodegas, boticas y farmacias independientes, carnicerías, panaderías, licorerías, bazares y peluquerías con ventas al crédito a vecinos habituales.  
@@ -51,7 +51,7 @@
 - **Motor financiero riguroso:** Primer software barrial que implementa el Método Francés vencido con capitalización en período de gracia, intereses compensatorios diarios y desglose formal de mora.
 - **Ciclos formales de crédito:** Fechas de corte y pago pactadas con liquidación automática consolidada por ciclo.
 - **Conformidad liviana de cargos:** Notificación por correo con 48 horas para observaciones, creando respaldo probatorio sin fricción.
-- **Cobranza desatendida:** Quina asume el rol del cobrador imparcial mediante recordatorios por correo, protegiendo la relación vecinal del comerciante.
+- **Cobranza desatendida:** Quina asume el rol del cobrador imparcial mediante recordatorios por correo, protegiendo la relación vecinal del comerciante. Los avisos son automáticos en Bodega Pro y Negocio Plus; en el Plan Casero el dueño los envía con un botón.
 - **Inventario valorizado enlazado:** Control estricto que prohíbe ventas sin stock y calcula el costo promedio ponderado para mostrar la ganancia real.  
 **How we do it differently:** No somos una libreta de notas digital ni un ERP corporativo complejo: somos un gestor de crédito estructurado adaptado al mostrador del casero.  
 **Why that's better:** El comerciante gana legitimidad al cobrar intereses respaldados por fórmulas matemáticas y recupera su dinero más rápido sin deteriorar la relación humana con su comunidad.  
@@ -112,7 +112,7 @@
 
 ## Goals
 **Business goal:** Convertir a Quina en la herramienta estándar de crédito barrial en el Perú, alcanzando una tasa de retención superior al 85 % en comercios activos.  
-**Conversion action:** Registro en el Plan Casero (Gratis) y activación del primer cliente con línea de crédito configurada en menos de 5 minutos.  
+**Conversion action:** Registro gratis y sin tarjeta (empieza con 14 días de prueba de Bodega Pro y luego sigue en el Plan Casero si no se suscribe) y activación del primer cliente con línea de crédito configurada en menos de 5 minutos.  
 **Current metrics:** Fase de diseño y validación académica (Prototipo V1 para el curso SI642).
 
 ## Changelog

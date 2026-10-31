@@ -9,7 +9,48 @@ construcción de la aplicación web de **Quina**. Aplica los principios de
 independientes de frameworks y completamente testeables sin bases de datos.
 
 Para una visión global del producto, consulta la
-[documentación maestra de Quina](../quina-documentation.md).
+[documentación maestra de Quina](quina-documentation.md).
+
+---
+
+## 0. Dónde vive la webapp: `quina.andeva.tech/app`
+
+Quina es un producto de **Andeva** y vive en el subdominio `quina.andeva.tech`,
+del mismo modo en que Google publica cada producto en su propio subdominio
+(`gemini.google.com`, `drive.google.com`). Dentro de ese subdominio, el **sitio
+público** ocupa la raíz y la **webapp** ocupa la ruta `/app`.
+
+**La webapp no tiene un dominio ni un subdominio propio.** No existe
+`app.quina.andeva.tech` ni un dominio aparte: todo lo que construye este
+repositorio se sirve debajo de `https://quina.andeva.tech/app`.
+
+| Qué | URL pública |
+| :--- | :--- |
+| Sitio público (otro repositorio, `quina-website`) | `https://quina.andeva.tech` |
+| Webapp: panel del comerciante o portal del vecino, según el rol | `https://quina.andeva.tech/app` |
+| Iniciar sesión | `https://quina.andeva.tech/app/login` |
+| Registrar una bodega | `https://quina.andeva.tech/app/register` |
+| Olvidé mi contraseña | `https://quina.andeva.tech/app/auth/forgot-password` |
+| Restablecer contraseña (enlace del correo) | `https://quina.andeva.tech/app/auth/reset-password?token=...` |
+| Portal del vecino | `https://quina.andeva.tech/app/portal` |
+| API de autenticación (Better Auth) | `https://quina.andeva.tech/app/api/auth/*` |
+| Webhooks (Mercado Pago, Resend) | `https://quina.andeva.tech/app/api/webhooks/*` |
+| Proceso programado diario | `https://quina.andeva.tech/app/api/cron/daily` |
+
+Reglas que se derivan de esto:
+
+- Next.js usa `basePath: '/app'`. Dentro del código las rutas se escriben sin el
+  prefijo (`/login`, `/register`) y Next.js lo agrega; las URLs absolutas (correos,
+  Better Auth, Google, Mercado Pago) salen siempre de `APP_URL`
+  (`https://quina.andeva.tech/app`).
+- Ninguna pantalla, correo o configuración debe apuntar a otro dominio o
+  subdominio para la webapp.
+- Como sitio y webapp comparten el mismo origen, comparten también la cookie de
+  idioma `quina-lang` y la preferencia de tema guardada en `localStorage`
+  (clave `theme`).
+
+El detalle técnico de cómo el sitio reenvía `/app` a este proyecto está en la
+sección 9.
 
 ---
 
@@ -64,9 +105,13 @@ ORM, Quina implementa una arquitectura en capas concéntricas basada en la
      que traducen entradas de usuario o webhooks a DTOs de aplicación.
    - **Adaptadores secundarios (Driven):** implementaciones concretas de los
      puertos: repositorios en Drizzle ORM sobre PostgreSQL, cliente de Resend,
-     cliente de Supabase Storage, cliente de Mercado Pago y cliente de Groq.
-4. **Presentación e interfaz (`src/app`, `src/components`):**
-   - Componentes React interactivos, layouts, estados optimistas y vistas PWA.
+     cliente de Supabase Storage, cliente de Mercado Pago, cliente de Groq y la
+     configuración de Better Auth (autenticación y sesiones).
+4. **Presentación e interfaz (`src/app`, `src/presentation`):**
+   - `src/app` contiene solo las rutas de Next.js (páginas, layouts y Route
+     Handlers), porque el App Router solo reconoce `app/` o `src/app/`.
+   - `src/presentation` reúne las Server Actions, los componentes React, los
+     hooks, la configuración de idiomas, la fuente y los estilos.
 
 ---
 
@@ -162,9 +207,13 @@ La integración entre contextos se gobierna mediante patrones tácticos formales
 3. **`Credit & Ledger` $\rightarrow$ `Notification & Messaging` (Domain Events):**
    - El motor financiero publica eventos de dominio en memoria
      (`CreditChargeCreatedEvent`, `CycleSettledEvent`, `LatePaymentDetectedEvent`).
-     El adaptador de notificaciones escucha estos eventos y delega el envío a
-     Resend de forma asíncrona, manteniendo el núcleo financiero 100 % desacoplado
-     de la infraestructura de correo.
+     El adaptador de notificaciones los traduce en correos de Resend,
+     manteniendo el núcleo financiero 100 % desacoplado de la infraestructura de
+     correo.
+   - Los cargos fiados **no** generan un correo por venta: se agrupan en un
+     **resumen diario por vecino** que despacha el proceso programado (ver
+     sección 11). Así un vecino recibe como máximo un aviso de cargos al día y el
+     volumen cabe en la capa gratuita de Resend.
 4. **`Credit & Ledger` $\rightarrow$ `Analytics & Insights` (Published Language):**
    - Las liquidaciones mensuales cerradas se publican como proyecciones
      financieras de solo lectura para alimentar el prompt de recomendaciones de IA
@@ -180,9 +229,10 @@ docente y el usuario bodeguero, se define el glosario canónico:
 | **Fiado / Crédito barrial** | `Credit & Ledger` | Crédito de consumo a corto plazo otorgado por confianza mercantil entre el comercio y el vecino. | *Micropréstamo bancario*, *Crédito subprime* |
 | **Fecha de corte** | `Credit & Ledger` | Día mensual en que se consolidan las compras del período para liquidar intereses y cuotas. | *Closing date contable*, *Facturación fiscal* |
 | **Fecha de pago pactada** | `Credit & Ledger` | Día mensual acordado en que el vecino se compromete a cancelar la liquidación sin mora. | *Due date financiero corporativo* |
-| **Período de gracia capitalizado** | `Credit & Ledger` | Días entre la fecha de compra y el corte en ventas en cuotas, cuyos intereses se suman al capital antes de aplicar la cuota francesa. | *Días muertos*, *Carencia simple* |
+| **Período de gracia capitalizado** | `Credit & Ledger` | En ventas en cuotas, días entre la fecha de compra y la fecha de pago pactada del ciclo al que pertenece la compra; sus intereses se suman al capital antes de aplicar la cuota francesa. | *Días muertos*, *Carencia simple* |
 | **Interés moratorio** | `Credit & Ledger` | Cargo compensatorio adicional por días de atraso sobre el saldo total impago posterior a la fecha pactada. | *Penalidad punitiva*, *Mora judicial* |
-| **Conformidad de cargo** | `Credit & Ledger` | Mecanismo de aceptación de deuda notificado por correo con plazo de 48 h para objeciones. | *Firma digital notarial*, *Pagaré legal* |
+| **Conformidad de cargo** | `Credit & Ledger` | Mecanismo de aceptación de deuda: el resumen diario por correo informa los cargos del día y abre un plazo de 48 h para objeciones. Un cargo objetado lo confirma o lo anula el dueño (`credit_charge_voids`). | *Firma digital notarial*, *Pagaré legal* |
+| **Resumen diario de cargos** | `Notification & Messaging` | Correo único por vecino y día con todas sus compras fiadas de ese día. | *Correo por venta* |
 | **Kardex valorizado** | `Catalog & Inventory` | Registro cronológico e inmutable de entradas y salidas de stock evaluadas al costo promedio ponderado. | *Inventario simple*, *Stock en memoria* |
 
 ### 2.5. Evaluación de cohesión y prevención de anti-patrones
@@ -224,7 +274,8 @@ coherente de herramientas en TypeScript:
 | **Formularios**      | React Hook Form + Zod       | Estándar de tipado               | Validación estricta en dos niveles (cliente y servidor) con DTOs tipados.              |
 | **ORM y Datos**      | Drizzle ORM                 | `drizzle-orm` + `postgres-js`    | Cero arranques en frío en Vercel, transacciones SQL ACID nativas y esquemas tipados.    |
 | **Base de datos**    | Supabase PostgreSQL         | PostgreSQL 16+ (Plan Free)       | Motor transaccional relacional con Row Level Security (RLS) para multi-tenancy.         |
-| **Autenticación**    | Auth.js / NextAuth          | v5 (Google OAuth + Credentials)  | Manejo de sesiones seguras, login federado con Google y contraseñas con Argon2id.      |
+| **Autenticación**    | Better Auth                 | `better-auth` + plugins          | Sesiones en base de datos, correo y contraseña (Argon2id), Google OAuth, OTP de 6 dígitos, enlaces mágicos, Turnstile y límite de tasa en un solo paquete. |
+| **Idiomas**          | next-intl                   | `next-intl`                      | Interfaz y correos en castellano, inglés y quechua; lee la cookie `quina-lang` del sitio. |
 | **Protección bots**  | Cloudflare Turnstile        | `@marsidev/react-turnstile`      | Captcha 100 % gratuito, no intrusivo y sin retos visuales para proteger el login y altas.|
 | **Correos**          | Resend SDK                  | `resend` (Capa gratuita)         | Despacho asíncrono de notificaciones de cargo, recordatorios y alertas de mora.         |
 | **Pagos SaaS**       | Mercado Pago SDK            | `mercadopago`                    | Suscripciones recurrentes en soles peruanos con tarjetas locales y webhooks seguros.    |
@@ -256,8 +307,9 @@ evaluaron y descartaron alternativas complejas:
   verdad financiera debe ser transaccional e inmediata en PostgreSQL.
 - **Rendimiento demostrado:** Con índices relacionales adecuados en PostgreSQL
   (`store_id`, `customer_id`), las consultas de cartera toman menos de 5 ms.
-- **Seguridad perimetral resuelta:** La protección contra ataques de fuerza bruta y
-  bloqueos por IP los asume Cloudflare WAF en el borde perimetral.
+- **Seguridad perimetral resuelta:** El límite de tasa de Better Auth se guarda en
+  PostgreSQL (tabla `rate_limits`), el bloqueo de cuentas vive en `users` y
+  Cloudflare Turnstile filtra bots en los formularios de acceso.
 - **Simplicidad operativa:** Evita añadir otro servicio en la nube, costos
   adicionales y latencia entre Vercel y el proveedor de caché.
 
@@ -269,8 +321,24 @@ La estructura de carpetas implementa la separación estricta entre Dominio,
 Aplicación, Infraestructura y Presentación dentro del App Router de Next.js:
 
 ```text
-quina-app/
+quina-webapp/
+├── messages/                             # Textos de interfaz: es.json, en.json, qu.json (next-intl)
+├── public/brand/                         # Isologos, isotipos, favicon e íconos de la PWA
 ├── src/
+│   ├── app/                              # SOLO rutas de Next.js (bajo basePath /app)
+│   │   ├── (auth)/login/                 # /app/login: acceso seguro
+│   │   ├── (auth)/register/              # /app/register: registro autoservicio (US24)
+│   │   ├── (dashboard)/                  # Vistas de mostrador del comerciante
+│   │   │   ├── sales/                    # Despacho en 3 toques
+│   │   │   ├── customers/                # Gestión de cuentas y créditos
+│   │   │   ├── inventory/                # Catálogo, kardex y compras
+│   │   │   ├── portfolio/                # Panel de cartera y cobranza
+│   │   │   └── reports/                  # Reportes financieros e IA
+│   │   ├── (customer)/portal/            # /app/portal: consulta gratuita del vecino
+│   │   ├── api/auth/[...all]/            # Route Handler de Better Auth
+│   │   ├── api/webhooks/                 # Mercado Pago y rebotes de Resend
+│   │   ├── api/cron/daily/               # Proceso programado diario (Vercel Cron)
+│   │   └── layout.tsx                    # Importa globals.css y la fuente
 │   ├── core/                             # NÚCLEO PURO (Sin dependencias de frameworks)
 │   │   ├── domain/                       # Capa 1: Dominio y Reglas de Negocio
 │   │   │   ├── credit/                   # Entidades: Customer, CreditAccount, Installment
@@ -303,29 +371,27 @@ quina-app/
 │   │   ├── email/                        # ResendNotificationAdapter (implementa puerto)
 │   │   ├── storage/                      # SupabaseStorageAdapter (implementa puerto)
 │   │   ├── payments/                     # MercadoPagoPaymentAdapter (implementa puerto)
-│   │   └── ai/                           # GroqAIRecommendationAdapter (implementa puerto)
-│   └── presentation/                     # Capa 4: Adaptadores Primarios y UI (Next.js)
-│       ├── app/                          # Next.js App Router (Páginas y layouts)
-│       │   ├── (auth)/login/             # Pantalla de acceso seguro
-│       │   ├── (dashboard)/              # Vistas de mostrador del comerciante
-│       │   │   ├── sales/                # Despacho en 3 toques
-│       │   │   ├── customers/            # Gestión de cuentas y créditos
-│       │   │   ├── inventory/            # Catálogo, kardex y compras
-│       │   │   ├── portfolio/            # Panel de cartera y cobranza
-│       │   │   └── reports/              # Reportes financieros e IA
-│       │   ├── (customer)/portal/        # Consulta pública gratuita del vecino
-│       │   ├── api/webhooks/             # Route Handlers para Mercado Pago
-│       │   └── actions/                  # Server Actions (Invocan Use Cases)
+│   │   ├── ai/                           # GroqAIRecommendationAdapter (implementa puerto)
+│   │   └── auth/                         # Configuración de Better Auth y hooks de bloqueo
+│   └── presentation/                     # Capa 4: Adaptadores Primarios y UI
+│       ├── actions/                      # Server Actions (invocan casos de uso)
 │       ├── components/                   # Componentes visuales
 │       │   ├── ui/                       # shadcn/ui (Botones, diálogos, tablas)
 │       │   ├── feedback/                 # Toasts Sileo y Skeletons Boneyard
 │       │   └── forms/                    # Formularios con validación Zod
-│       └── hooks/                        # Custom hooks y UI optimista
+│       ├── hooks/                        # Custom hooks y UI optimista
+│       ├── i18n/                         # Solo configuración de next-intl (los textos van en messages/)
+│       ├── fonts/                        # Albert Sans variable (next/font/local)
+│       └── styles/globals.css            # Tokens de Quina y configuración de Tailwind 4 (@theme)
+├── tests/                                # unit/, fakes/ (repositorios en memoria) y e2e/
 ├── drizzle.config.ts                     # Configuración de migraciones Drizzle Kit
-├── tailwind.config.ts                    # Configuración de Tailwind CSS v4
-├── next.config.ts                        # Configuración de Next.js PWA
+├── next.config.ts                        # basePath '/app' y configuración PWA
 └── package.json                          # Dependencias gestionadas con pnpm
 ```
+
+Tailwind CSS 4 no usa `tailwind.config.ts`: los tokens y las variantes se
+declaran en CSS, con `@theme` y `@custom-variant` dentro de
+`src/presentation/styles/globals.css`.
 
 ---
 
@@ -339,8 +405,8 @@ ni levantar contenedores Docker:
 ```typescript
 // tests/unit/RegisterCreditSaleUseCase.spec.ts
 import { RegisterCreditSaleUseCase } from "@/core/application/credit/RegisterCreditSaleUseCase";
-import { InMemoryCustomerRepository } from "@/tests/fakes/InMemoryCustomerRepository";
-import { InMemorySaleRepository } from "@/tests/fakes/InMemorySaleRepository";
+import { InMemoryCustomerRepository } from "../fakes/InMemoryCustomerRepository";
+import { InMemorySaleRepository } from "../fakes/InMemorySaleRepository";
 import { Money } from "@/core/domain/shared/Money";
 
 describe("RegisterCreditSaleUseCase", () => {
@@ -379,15 +445,23 @@ Quina implementa una arquitectura de seguridad por capas que balancea una
 protección estricta para las cuentas comerciales (dueños y cajeros) con una
 experiencia sin fricción para los clientes vecinos (caseros deudores).
 
+Toda la autenticación se construye con **Better Auth** sobre las tablas de
+Drizzle: sesiones guardadas en PostgreSQL (cerrar sesión las invalida al
+instante), correo y contraseña, Google OAuth y los plugins `emailOTP`,
+`magicLink` y `captcha` (Cloudflare Turnstile). El DNS de `quina.andeva.tech`
+apunta a Vercel con el proxy de Cloudflare apagado, así que el firewall y la
+mitigación de DDoS en el borde los provee Vercel; de Cloudflare se usan el DNS y
+Turnstile.
+
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        Capa de Borde (Cloudflare)                      │
-│     WAF + Anti-DDoS + Cloudflare Turnstile (Captcha 100 % gratuito)    │
+│             Capa de Borde (Vercel + Cloudflare Turnstile)              │
+│   Firewall y anti-DDoS de Vercel + Turnstile (captcha 100 % gratuito)  │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   Capa de Autenticación (Auth.js v5)                   │
+│                   Capa de Autenticación (Better Auth)                  │
 │                                                                        │
 │   ┌───────────────────────────┐      ┌─────────────────────────────┐   │
 │   │ Comerciante / Empleado    │      │ Cliente Vecino (Doña Rosa)  │   │
@@ -401,7 +475,7 @@ experiencia sin fricción para los clientes vecinos (caseros deudores).
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                  Base de Datos (Supabase PostgreSQL 16)                │
-│    `users`, `accounts`, `email_verifications`, `password_reset_tokens` │
+│  `users`, `sessions`, `accounts`, `verifications`, `rate_limits`      │
 │    + Row Level Security (RLS) con `app.current_store_id`               │
 └────────────────────────────────────────────────────────────────────────┘
 ```
@@ -417,8 +491,10 @@ Para las cuentas con acceso al mostrador y administración (`STORE_OWNER` y
   (como "123456" o "bodega2026").
 - **Algoritmo de derivación de claves:** se utiliza **Argon2id** (ganador del
   *Password Hashing Competition* y recomendado por OWASP), configurado con
-  memoria de 64 MB, 3 iteraciones y paralelismo de 4 hilos (o **bcrypt** con
-  factor de costo 12 como alternativa nativa en Node.js).
+  memoria de 64 MB, 3 iteraciones y paralelismo de 4 hilos. Better Auth usa
+  scrypt por defecto; Quina lo reemplaza con `@node-rs/argon2` mediante las
+  funciones `password.hash` y `password.verify`. El hash vive en
+  `accounts.password` (proveedor `credential`).
 - **Protección contra fuga:** las contraseñas nunca se guardan en texto plano ni
   se retornan en consultas de API o DTOs de lectura.
 
@@ -430,13 +506,14 @@ recibir notificaciones de deuda o acceso:
 - **Generación aleatoria segura:** el servidor genera un número criptográfico
   pseudoaleatorio de 6 dígitos numéricos (`100000` a `999999`) usando
   `crypto.randomInt()`.
-- **Almacenamiento seguro en base de datos:** en la tabla `email_verifications`,
-  no se guarda el código en texto plano; se almacena su hash SHA-256
-  (`otp_hash`).
+- **Almacenamiento seguro en base de datos:** el plugin `emailOTP` de Better
+  Auth guarda el código en la tabla `verifications` con la opción
+  `storeOTP: "hashed"`: nunca queda en texto plano.
 - **Tiempo de vida (TTL):** el código expira automáticamente a los **15 minutos**
-  de su emisión (`expires_at = NOW() + INTERVAL '15 minutes'`).
+  de su emisión (`expiresIn: 900`).
 - **Límite de reintentos y tasa (Rate limiting):**
-  - Máximo **5 intentos erróneos** permitidos antes de invalidar el registro.
+  - Máximo **5 intentos erróneos** permitidos antes de invalidar el código
+    (`allowedAttempts: 5`).
   - El botón de reenvío en la interfaz tiene un bloqueo de **60 segundos** entre
     solicitudes para evitar spam de correos.
 - **Canal de despacho:** se envía una plantilla limpia en HTML a través del SDK
@@ -456,19 +533,20 @@ requerir memorizar contraseñas:
   1. El usuario hace clic en **"Continuar con Google"**.
   2. Next.js redirige al servidor de autorización de Google solicitando los
      ámbitos (`scopes`) mínimos: `openid`, `email` y `profile`.
-  3. Google redirige a `/api/auth/callback/google` con un código de autorización.
+  3. Google redirige a `/app/api/auth/callback/google` con un código de autorización.
   4. El servidor intercambia el código por tokens y obtiene el identificador
      único de usuario de Google (`sub`).
-  5. Si el correo coincide con un usuario existente, vincula la cuenta en la
-     tabla `accounts`; si es un cliente nuevo, crea automáticamente el usuario
-     con correo verificado.
+  5. Better Auth vincula la cuenta en la tabla `accounts` (`provider_id = 'google'`)
+     si el correo ya existe, o crea el usuario con correo verificado. Los tokens
+     de Google se guardan cifrados (`account.encryptOAuthTokens`).
 
 ### 7.4. Política anti-fuerza bruta y bloqueo temporal de cuentas (*Account Lockout*)
 
 Para neutralizar ataques de diccionario y prueba automatizada de credenciales:
 
 - **Monitoreo de intentos:** la tabla `users` mantiene el contador
-  `failed_login_attempts SMALLINT`.
+  `failed_login_attempts SMALLINT`. Better Auth no trae este bloqueo: se
+  implementa con sus *hooks* antes y después de `/sign-in/email`.
 - **Regla de bloqueo:** tras **5 intentos fallidos consecutivos**, el sistema
   bloquea la cuenta fijando `locked_until = NOW() + INTERVAL '15 minutes'`.
 - **Comportamiento en intento bloqueado:** cualquier intento de autenticación
@@ -493,31 +571,32 @@ Para neutralizar ataques de diccionario y prueba automatizada de credenciales:
     segundo plano; solo muestra una casilla de un clic si detecta anomalías en
     el navegador.
 - **Validación dual (Cliente y Servidor):**
-  - El componente React (`@marsidev/react-turnstile`) obtiene un token de desafío.
-  - El Server Action en Next.js valida el token contra la API de Cloudflare
-    (`https://challenges.cloudflare.com/turnstile/v0/siteverify`) utilizando la
-    clave secreta del servidor antes de procesar el intento de login o registro.
+  - El componente React (`@marsidev/react-turnstile`) obtiene un token de desafío
+    y lo envía en la cabecera `x-captcha-response`.
+  - El plugin `captcha` de Better Auth (proveedor `cloudflare-turnstile`) valida
+    el token contra la API de Cloudflare con la clave secreta del servidor antes
+    de procesar el login, el registro o la recuperación de contraseña.
 
 ### 7.6. Recuperación de contraseña olvidada con enlace y token criptográfico
 
 Cuando un usuario no recuerda su contraseña:
 
-1. **Solicitud de rescate:** el usuario ingresa su correo en `/auth/forgot-password`.
+1. **Solicitud de rescate:** el usuario ingresa su correo en `/app/auth/forgot-password`.
 2. **Mitigación de enumeración de usuarios:** el sistema siempre responde en
    pantalla: *"Si el correo ingresado se encuentra registrado, recibirás un enlace de recuperación en breve"*,
    impidiendo que atacantes descubran qué correos existen en Quina.
-3. **Generación del token seguro:** el servidor genera un token criptográfico
-   de alta entropía de 32 bytes (`crypto.randomBytes(32).toString('hex')`).
-4. **Almacenamiento de hash:** se calcula el hash SHA-256 del token y se inserta
-   en `password_reset_tokens` con `expires_at = NOW() + INTERVAL '30 minutes'` y
-   `used_at = NULL`.
+3. **Generación del token seguro:** Better Auth genera un token criptográfico de
+   alta entropía y lo guarda en `verifications` con expiración de 30 minutos
+   (`resetPasswordTokenExpiresIn: 1800`).
+4. **Un solo uso:** al consumirse, el registro de `verifications` se elimina, de
+   modo que el enlace no se puede reutilizar.
 5. **Envío de correo por Resend:** se despacha un correo transaccional con el
    enlace de un solo uso:
-   `https://quina.andeva.tech/auth/reset-password?token=<token_plano>`.
-6. **Consumo y cambio de clave:** al abrir el enlace, el servidor valida que el
-   token coincida por su hash, que no haya expirado y que `used_at IS NULL`. El
-   usuario ingresa su nueva contraseña segura, se marca `used_at = NOW()` y se
-   reinician los contadores de fallos de login.
+   `https://quina.andeva.tech/app/auth/reset-password?token=<token_plano>`.
+6. **Consumo y cambio de clave:** al abrir el enlace, Better Auth valida que el
+   token exista y no haya expirado. El usuario ingresa su nueva contraseña
+   segura, se cierran sus sesiones activas y un *hook* reinicia
+   `failed_login_attempts` y `locked_until`.
 
 ### 7.7. Experiencia de usuario y accesibilidad para clientes vecinos (Doña Rosa)
 
@@ -532,9 +611,9 @@ pensadas para el vecino:
 
 | Mecanismo de acceso | Experiencia del vecino (Doña Rosa) | Seguridad técnica |
 | :--- | :--- | :--- |
-| **1. Magic Link directo en notificaciones (1 clic)** | Cuando Don Lucho registra una compra fiada o llega el corte mensual, Doña Rosa recibe un correo con el botón *"Ver mi estado de cuenta"*. Al tocarlo en su celular, entra directamente a su cuenta sin ingresar ninguna clave. | Enlace firmado criptográficamente de un solo toque con expiración de 72 horas almacenado en `customer_auth_tokens`. |
+| **1. Magic Link directo en notificaciones (1 clic)** | Cuando Doña Rosa recibe su resumen diario de cargos o el aviso de corte, el correo trae el botón *"Ver mi estado de cuenta"*. Al tocarlo en su celular, entra directamente a su cuenta sin ingresar ninguna clave. | Plugin `magicLink` de Better Auth: enlace de un solo uso con expiración de 72 horas guardado en `verifications`; solo funciona para vecinos ya registrados por una tienda (`disableSignUp`). |
 | **2. Continuar con Google (1 toque)** | El 95 % de celulares Android en el Perú tienen cuenta Gmail configurada. Al ingresar a `quina.andeva.tech`, Doña Rosa toca el botón de Google y su teléfono valida su identidad al instante. | Google OAuth 2.0 estándar vinculado al correo del cliente registrado en la tienda. |
-| **3. Acceso por DNI + Código OTP (Sin contraseña)** | Si Doña Rosa entra desde otro teléfono, ingresa su número de DNI. El sistema le envía un código de 6 números a su correo. Lo copia, lo pega y entra. | OTP numérico de 6 dígitos con tiempo de expiración de 15 minutos y tasa limitada. |
+| **3. Acceso por DNI + Código OTP (Sin contraseña)** | Si Doña Rosa entra desde otro teléfono, ingresa su número de DNI. El sistema le envía un código de 6 números a su correo. Lo copia, lo pega y entra. | El servidor busca los correos registrados para ese DNI (puede estar en varias tiendas) y envía un código a cada correo distinto con el inicio de sesión por OTP del plugin `emailOTP`: 6 dígitos, 15 minutos, 5 intentos y límite de tasa. La respuesta en pantalla es siempre la misma, sin revelar tiendas ni correos, y la sesión solo ve las tiendas que tienen el correo validado. |
 | **4. Contraseña personalizada (Opcional)** | Si el cliente desea fijar una contraseña permanente para ingresar tradicionalmente con correo y clave, puede configurarla en su perfil cuando lo desee. | Almacenamiento seguro bajo Argon2id, totalmente voluntario para el vecino. |
 
 ---
@@ -546,10 +625,112 @@ en PostgreSQL 16 sobre Supabase, estructurado en torno a los Bounded Contexts de
 la aplicación.
 
 El detalle técnico exhaustivo, que incluye el diccionario de datos completo de
-las **26 tablas**, los tipos de datos numéricos exactos, las restricciones de
+las **35 tablas**, los tipos de datos numéricos exactos, las restricciones de
 integridad referencial, los índices compuestos de alto rendimiento, las
-políticas de Row Level Security (RLS) y los esquemas en Drizzle ORM, se
-encuentra documentado en:
+políticas de Row Level Security (RLS), los roles de base de datos y los esquemas
+en Drizzle ORM, se encuentra documentado en:
 
 👉 **[Especificación completa del esquema de base de datos PostgreSQL](quina-database-schema.md)**
 
+---
+
+## 9. Integración con el sitio público (`quina.andeva.tech`)
+
+El sitio público (repositorio `quina-website`, Astro) y la webapp (repositorio
+`quina-webapp`, Next.js) son proyectos separados en Vercel que se sirven bajo el
+mismo dominio: el sitio en la raíz y la webapp en **`/app`**.
+
+- **`basePath: '/app'`** en `next.config.ts`: todas las rutas, los recursos
+  estáticos y los Route Handlers de la webapp viven bajo `/app`.
+- **Rewrite desde el sitio:** el `vercel.json` del sitio reenvía `/app` y
+  `/app/:path*` al despliegue de la webapp. Para el navegador todo es
+  `quina.andeva.tech`, así que las cookies de sesión y la cookie de idioma se
+  comparten sin configuración extra.
+- **Rutas que el sitio ya enlaza:** `/app/register` (botones "Empieza gratis"),
+  `/app/login` (botón "Ingresar") y la raíz `/app` (portal). El sitio redirige
+  además `/login` → `/app/login`.
+- **URLs absolutas:** `baseURL` de Better Auth y los enlaces de los correos usan
+  `https://quina.andeva.tech/app`. La URI de redirección autorizada en Google
+  Cloud es `https://quina.andeva.tech/app/api/auth/callback/google`.
+
+**Variables de entorno de la webapp:**
+
+| Variable | Uso |
+| :--- | :--- |
+| `APP_URL` | URL pública de la webapp (`https://quina.andeva.tech/app`). |
+| `DATABASE_URL` | Conexión de la aplicación con el rol `quina_app` por Supavisor (puerto 6543). |
+| `DATABASE_MIGRATION_URL` | Conexión directa con el rol `postgres` (puerto 5432), solo para Drizzle Kit. |
+| `BETTER_AUTH_SECRET` | Secreto para firmar sesiones y cifrar tokens de OAuth. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Credenciales de Google OAuth 2.0. |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Claves de Cloudflare Turnstile. |
+| `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET` | Envío de correos y webhook de rebotes. |
+| `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` | Mercado Pago: suscripciones y validación de webhooks. |
+| `GROQ_API_KEY` | Recomendaciones con IA. |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Solo Supabase Storage desde el servidor (comprobantes y QR de cobro). |
+| `CRON_SECRET` | Protege el proceso programado diario. |
+
+---
+
+## 10. Idiomas: castellano, inglés y quechua
+
+El sitio público ofrece castellano, inglés y quechua, y guarda la elección en la
+cookie `quina-lang`. La webapp continúa esa elección:
+
+- **Librería:** `next-intl`, con un archivo de mensajes por idioma
+  (`messages/es.json`, `messages/en.json`, `messages/qu.json`) en la raíz del
+  repositorio. La configuración de `next-intl` vive en `src/presentation/i18n/`.
+  Ningún texto de interfaz se escribe suelto en los componentes.
+- **Sin idioma en la URL:** igual que la cookie compartida, el idioma no forma
+  parte de la ruta (`/app/ventas`, no `/app/es/ventas`).
+- **Orden de resolución:** `users.preferred_locale` (si hay sesión) → cookie
+  `quina-lang` → cabecera `Accept-Language` → castellano. Al registrarse, el
+  idioma de la cookie se guarda en `users.preferred_locale`.
+- **Correos a vecinos:** se redactan en `customers.preferred_locale` o, si no
+  tiene, en `stores.default_locale`.
+- **Formatos:** montos y fechas siempre con formato peruano (`es-PE`, `S/`),
+  sea cual sea el idioma de la interfaz.
+- **Quechua:** los textos en quechua son un borrador pendiente de revisión por
+  un traductor nativo, igual que en el sitio.
+
+---
+
+## 11. Procesos programados y correos
+
+### 11.1. Proceso diario único
+
+Las tareas automáticas corren en **un solo proceso diario**
+(`/app/api/cron/daily`), compatible con el plan Hobby de Vercel (Cron una vez al
+día). Se agenda a las 11:00 UTC (06:00 en Lima), exige la cabecera con
+`CRON_SECRET` y cada paso es **idempotente**: si se repite, no duplica cargos,
+cortes ni correos.
+
+| Orden | Paso | Qué hace |
+| :---: | :--- | :--- |
+| 1 | Resumen diario de cargos | Agrupa por vecino los cargos con `notified_at` vacío y envía **un correo por vecino** (`CHARGE_DIGEST`). Marca `notified_at` y fija `consent_deadline` 48 h después del envío. |
+| 2 | Conformidad tácita | Los cargos `PENDING` cuyo `consent_deadline` ya pasó quedan `ACCEPTED`. |
+| 3 | Cortes | Liquida las cuentas cuyo día de corte fue **el día anterior** (las compras hasta las 23:59:59, hora de Lima, de ese día entran al ciclo): crea el ciclo si solo vencen cuotas, calcula intereses, descuenta los cargos anulados, pasa el ciclo a `BILLED` y envía el estado de cuenta. |
+| 4 | Recordatorios | Envía `PAYMENT_REMINDER` a los ciclos `BILLED` que vencen en 3 días. El índice único de `notification_logs` impide duplicados. |
+| 5 | Mora | Pasa a `OVERDUE` los ciclos y cuotas vencidos sin pago y envía el aviso de mora. Con un ciclo `OVERDUE`, el vecino no puede comprar al crédito hasta pagarlo. |
+| 6 | Suscripciones | Al terminar la prueba de 14 días o el periodo de gracia sin pago, la tienda vuelve al Plan Casero. |
+
+Los pasos 1 y 4 son automáticos solo en **Bodega Pro** y **Negocio Plus**. En el
+**Plan Casero** los avisos por correo son manuales (estrategia de precios): el
+dueño envía el resumen de cargos y los recordatorios con un botón, y el plazo de
+48 h de conformidad cuenta desde ese envío. Los cortes (paso 3) y la mora
+(paso 5) corren en todos los planes porque son reglas del motor financiero.
+
+### 11.2. Presupuesto de correos (Resend, capa gratuita)
+
+La capa gratuita de Resend permite **100 correos al día y 3,000 al mes**, con el
+dominio `andeva.tech` ya verificado. Para un producto académico con pocas tiendas
+alcanza gracias al resumen diario: cada vecino recibe como máximo un aviso de
+cargos al día, en lugar de uno por compra.
+
+- **Prioridad:** los correos de autenticación (OTP, recuperación, bloqueo) se
+  envían siempre al momento. Los resúmenes diarios van al final del proceso.
+- **Si se agota la cuota:** los resúmenes que no salieron conservan
+  `notified_at` vacío y se envían al día siguiente; el plazo de 48 h cuenta desde
+  el envío real, nunca desde la compra.
+- **Rebotes:** el webhook de Resend marca el envío como `BOUNCED` en
+  `notification_logs` y llena `customers.email_bounced_at`, lo que muestra una
+  alerta en la ficha del vecino.
