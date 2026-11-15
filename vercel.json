@@ -5,6 +5,7 @@
     { "source": "/app/:path*", "destination": "https://quina-webapp.vercel.app/app/:path*" }
   ],
   "redirects": [
+    { "source": "/app/", "destination": "/app", "permanent": false },
     { "source": "/login", "destination": "/app/login", "permanent": false },
     { "source": "/ingresar", "destination": "/app/login", "permanent": false },
     { "source": "/registro", "destination": "/app/register", "permanent": false }
