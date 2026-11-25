@@ -19,6 +19,10 @@ const pages = [
   '/soluciones/boticas',
   '/soluciones/panaderias',
   '/soluciones/bazares',
+  '/legal/privacidad',
+  '/legal/terminos',
+  '/legal/cookies',
+  '/libro-de-reclamaciones',
 ];
 
 for (const path of pages) {
@@ -66,15 +70,33 @@ test('un toque abre y otro cierra el idioma aunque el equipo tenga mouse', async
   await expect(lang).not.toHaveAttribute('data-open', '');
 });
 
-test('el modo oscuro se recuerda al recargar', async ({ page }) => {
+test('el modo oscuro se recuerda al recargar y guarda la cookie quina-theme', async ({ page }) => {
   await page.goto('/');
   const html = page.locator('html');
   const before = await html.getAttribute('data-theme');
   await page.locator('[data-theme-toggle]').first().click();
   const after = before === 'dark' ? 'light' : 'dark';
   await expect(html).toHaveAttribute('data-theme', after);
+  const cookies = await page.context().cookies();
+  expect(cookies.find((c) => c.name === 'quina-theme')?.value).toBe(after);
   await page.reload();
   await expect(html).toHaveAttribute('data-theme', after);
+});
+
+test('las rutas /en/ y /qu/ guardan quina-lang y / no fuerza cookie por defecto', async ({
+  page,
+}) => {
+  await page.goto('/');
+  let cookies = await page.context().cookies();
+  expect(cookies.find((c) => c.name === 'quina-lang')).toBeUndefined();
+
+  await page.goto('/en/');
+  cookies = await page.context().cookies();
+  expect(cookies.find((c) => c.name === 'quina-lang')?.value).toBe('en');
+
+  await page.goto('/qu/');
+  cookies = await page.context().cookies();
+  expect(cookies.find((c) => c.name === 'quina-lang')?.value).toBe('qu');
 });
 
 test('el menú móvil abre y cierra', async ({ page, isMobile }) => {
@@ -165,4 +187,60 @@ test('si eligen el equipo antes de que cargue la calculadora, se respeta al carg
   await page.locator('.calc-team').scrollIntoViewIfNeeded();
   await expect(island).not.toHaveAttribute('ssr', '');
   await expect(page.locator('.calc-plan-link')).toHaveAttribute('href', '#plan-negocio-plus');
+});
+
+test('el panel de cookies abre desde el footer y respeta desactivar preferencias', async ({
+  page,
+}) => {
+  await page.goto('/legal/cookies');
+  // Sin analítica configurada no debe interrumpir ningún banner inicial
+  await expect(page.locator('[data-cookie-banner]')).toHaveCount(0);
+
+  // Primero activamos el tema para crear la cookie quina-theme
+  await page.locator('[data-theme-toggle]').first().click();
+  let cookies = await page.context().cookies();
+  expect(cookies.find((c) => c.name === 'quina-theme')).toBeDefined();
+
+  // Abrimos el panel desde el botón de la página y elegimos "Solo necesarias"
+  await page.locator('.cookie-trigger-btn').click();
+  const dialog = page.locator('[data-cookie-dialog]');
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-cookie-reject-all]').click();
+  await expect(dialog).not.toBeVisible();
+
+  // La cookie de preferencia se elimina y no se vuelve a crear al cambiar tema
+  cookies = await page.context().cookies();
+  expect(cookies.find((c) => c.name === 'quina-theme')).toBeUndefined();
+  await page.locator('[data-theme-toggle]').first().click();
+  cookies = await page.context().cookies();
+  expect(cookies.find((c) => c.name === 'quina-theme')).toBeUndefined();
+});
+
+test('el Libro de Reclamaciones valida y genera una hoja con código correlativo', async ({
+  page,
+}) => {
+  await page.goto('/libro-de-reclamaciones');
+  const form = page.locator('.claim-form');
+  await expect(form).toHaveAttribute('data-hydrated', 'true');
+
+  await page.getByLabel(/Nombre y apellidos completos/).fill('María Elena Quispe Flores');
+  await page.getByLabel(/Número de documento/).fill('45678912');
+  await page.getByLabel(/^Domicilio/).fill('Jr. Los Sauces 240, San Juan de Lurigancho, Lima');
+  await page.getByLabel(/Teléfono o celular/).fill('987654321');
+  await page.getByLabel(/Correo electrónico/).fill('maria@ejemplo.pe');
+  await page.getByLabel(/Descripción del plan o servicio/).fill('Plan Bodega Pro mensual');
+  await page
+    .getByLabel(/Detalle del reclamo o queja/)
+    .fill('Se realizó un cobro doble al renovar la suscripción mensual del mes en curso.');
+  await page
+    .getByLabel(/Pedido del consumidor/)
+    .fill('Solicito el extorno del segundo cobro duplicado.');
+  await page.getByLabel(/Declaro que los datos consignados son verídicos/).check();
+
+  await page.getByRole('button', { name: 'Enviar hoja de reclamación' }).click();
+
+  await expect(page.locator('[data-claim-code]')).toHaveText(/^LR-\d{4}-\d{5}$/);
+  await expect(
+    page.locator('.claim-receipt').getByText('15 días hábiles improrrogables'),
+  ).toBeVisible();
 });

@@ -13,6 +13,10 @@ const pages = [
   '/recursos/calculadora',
   '/producto/credito',
   '/soluciones/bodegas',
+  '/legal/privacidad',
+  '/legal/terminos',
+  '/legal/cookies',
+  '/libro-de-reclamaciones',
 ];
 
 // Con movimiento reducido no hay entradas a medio animar: axe mide la página
