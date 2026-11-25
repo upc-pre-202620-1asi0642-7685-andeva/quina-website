@@ -1,0 +1,517 @@
+---
+import type { MarkdownHeading } from 'astro';
+import BaseLayout from './BaseLayout.astro';
+import { site } from '@/data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  version: string;
+  lastUpdated: Date;
+  currentPath: string;
+  headings?: MarkdownHeading[];
+}
+
+const { title, description, version, lastUpdated, currentPath, headings = [] } = Astro.props;
+
+const formattedDate = lastUpdated.toLocaleDateString('es-PE', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+const toc = headings.filter((h) => h.depth === 2);
+
+const legalNav = [
+  { label: 'Política de privacidad', href: '/legal/privacidad' },
+  { label: 'Términos y condiciones', href: '/legal/terminos' },
+  { label: 'Política de cookies', href: '/legal/cookies' },
+  { label: 'Libro de Reclamaciones', href: '/libro-de-reclamaciones' },
+];
+---
+
+<BaseLayout title={`${title} · Quina`} description={description}>
+  <section class="legal-hero">
+    <div class="legal-hero-card">
+      <div class="legal-hero-inner" data-reveal-group>
+        <p class="legal-crumb" data-reveal>
+          Legal
+        </p>
+        <h1 class="legal-title" data-split>
+          {title}
+        </h1>
+        <p class="legal-lead" data-reveal>
+          {description}
+        </p>
+        <dl class="legal-meta" data-reveal>
+          <div>
+            <dt>Versión</dt>
+            <dd>{version}</dd>
+          </div>
+          <div>
+            <dt>Última actualización</dt>
+            <dd>
+              <time datetime={lastUpdated.toISOString().slice(0, 10)}>{formattedDate}</time>
+            </dd>
+          </div>
+          <div>
+            <dt>Ámbito</dt>
+            <dd>República del Perú</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <nav class="legal-tabs-wrap" aria-label="Documentos legales">
+    <div class="wrap">
+      <ul class="legal-tabs">
+        {legalNav.map((item) => {
+          const active = currentPath.replace(/\/$/, '') === item.href;
+          return (
+            <li>
+              <a
+                href={item.href}
+                class:list={['legal-tab', { 'is-active': active }]}
+                aria-current={active ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </nav>
+
+  <div class="wrap legal-body">
+    <aside class="legal-aside" aria-label="Índice y datos del titular">
+      {toc.length > 0 && (
+        <nav class="toc-card" aria-label="Contenido de este documento">
+          <p class="aside-title">En esta página</p>
+          <ol class="toc-list">
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`} class="toc-link">
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      <div class="entity-card">
+        <p class="aside-title">Titular del servicio</p>
+        <dl class="entity-list">
+          <div>
+            <dt>Titular</dt>
+            <dd>{site.legal.entity}</dd>
+          </div>
+          <div>
+            <dt>RUC</dt>
+            <dd>{site.legal.ruc}</dd>
+          </div>
+          <div>
+            <dt>Domicilio</dt>
+            <dd>{site.legal.address}</dd>
+          </div>
+          <div>
+            <dt>Contacto general</dt>
+            <dd>
+              <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
+            </dd>
+          </div>
+          <div>
+            <dt>Derechos ARCO</dt>
+            <dd>
+              <a href={`mailto:${site.arcoEmail}`}>{site.arcoEmail}</a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </aside>
+
+    <article class="legal-article">
+      <div class="legal-prose">
+        <slot />
+      </div>
+
+      <footer class="legal-footnote">
+        <p>
+          ¿Tienes dudas sobre este documento? Escríbenos a{' '}
+          <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a> o, para solicitudes de
+          protección de datos personales, a{' '}
+          <a href={`mailto:${site.arcoEmail}`}>{site.arcoEmail}</a>.
+        </p>
+        <p class="legal-credit">
+          Estructura de referencia adaptada a la legislación de la República del Perú a partir de
+          las plantillas de licencia CC0 1.0 de General Legal.
+        </p>
+      </footer>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .legal-hero {
+    padding: 0 0.75rem;
+  }
+
+  .legal-hero-card {
+    padding: clamp(3rem, 2rem + 4vw, 5.5rem) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+    border-radius: 28px;
+    background: var(--color-soft);
+    color: var(--color-soft-ink);
+  }
+
+  .legal-hero-inner {
+    width: min(100%, 52rem);
+    margin-inline: auto;
+  }
+
+  .legal-crumb {
+    margin-bottom: 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-soft-ink);
+  }
+
+  .legal-title {
+    font-size: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .legal-lead {
+    margin-top: 1.25rem;
+    max-width: 40rem;
+    font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.25rem);
+    line-height: 1.55;
+    color: var(--color-soft-ink-2);
+  }
+
+  .legal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2.5rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-soft-ink) 14%, transparent);
+  }
+
+  .legal-meta dt {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-soft-ink-2);
+  }
+
+  .legal-meta dd {
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-soft-ink);
+  }
+
+  .legal-tabs-wrap {
+    margin-top: 1.5rem;
+  }
+
+  .legal-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .legal-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 1.125rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-ink-soft);
+    transition:
+      background-color 200ms var(--ease-out-expo),
+      color 200ms var(--ease-out-expo),
+      border-color 200ms var(--ease-out-expo);
+  }
+
+  .legal-tab:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-ink);
+  }
+
+  .legal-tab.is-active {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  :global([data-theme='dark']) .legal-tab.is-active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  .legal-body {
+    display: grid;
+    gap: 3rem;
+    padding-block: clamp(3rem, 2rem + 3vw, 5rem) clamp(5rem, 4rem + 4vw, 8rem);
+  }
+
+  @media (min-width: 1024px) {
+    .legal-body {
+      grid-template-columns: 18rem minmax(0, 1fr);
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .legal-aside {
+      position: sticky;
+      top: 6.5rem;
+    }
+  }
+
+  .legal-aside {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .toc-card,
+  .entity-card {
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+  }
+
+  .aside-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink-soft);
+  }
+
+  .toc-list {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .toc-link {
+    display: block;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--color-ink-soft);
+    transition: color 200ms var(--ease-out-expo);
+  }
+
+  .toc-link:hover {
+    color: var(--color-link-active);
+  }
+
+  .entity-list {
+    display: grid;
+    gap: 0.875rem;
+    margin-top: 1rem;
+  }
+
+  .entity-list dt {
+    font-size: 0.8125rem;
+    color: var(--color-ink-soft);
+  }
+
+  .entity-list dd {
+    margin-top: 0.125rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .entity-list a {
+    color: var(--color-link-active);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .legal-article {
+    min-width: 0;
+    max-width: 46rem;
+  }
+
+  .legal-prose {
+    font-size: 1.0625rem;
+    line-height: 1.72;
+    color: var(--color-ink);
+  }
+
+  .legal-prose :global(h2) {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    scroll-margin-top: 6.5rem;
+    font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    color: var(--color-ink);
+  }
+
+  .legal-prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .legal-prose :global(h3) {
+    margin-top: 2rem;
+    margin-bottom: 0.625rem;
+    scroll-margin-top: 6.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+
+  .legal-prose :global(p + p),
+  .legal-prose :global(ul),
+  .legal-prose :global(ol),
+  .legal-prose :global(blockquote) {
+    margin-top: 1rem;
+  }
+
+  .legal-prose :global(ul) {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  .legal-prose :global(ol) {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+
+  .legal-prose :global(li + li) {
+    margin-top: 0.5rem;
+  }
+
+  .legal-prose :global(strong) {
+    font-weight: 700;
+  }
+
+  .legal-prose :global(a) {
+    color: var(--color-link-active);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .legal-prose :global(blockquote) {
+    padding: 1.125rem 1.375rem;
+    border-left: 3px solid var(--color-primary);
+    border-radius: 0 14px 14px 0;
+    background: var(--color-paper-deep);
+    color: var(--color-ink);
+  }
+
+  .legal-prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  .legal-prose :global(blockquote a) {
+    color: var(--color-soft-ink);
+    font-weight: 600;
+  }
+
+  .legal-prose :global(code) {
+    padding: 0.125rem 0.4rem;
+    border-radius: 6px;
+    background: var(--color-paper-deep);
+    font-size: 0.9em;
+  }
+
+  .legal-prose :global(.table-scroll) {
+    margin-top: 1.25rem;
+    overflow-x: auto;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: var(--color-surface);
+  }
+
+  .legal-prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .legal-prose :global(th),
+  .legal-prose :global(td) {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .legal-prose :global(th) {
+    font-weight: 700;
+    background: var(--color-paper-deep);
+    color: var(--color-ink);
+  }
+
+  .legal-prose :global(tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  .legal-prose :global(.cookie-trigger-btn) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    height: 2.75rem;
+    padding-inline: 1.25rem;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-out-expo);
+  }
+
+  .legal-prose :global(.cookie-trigger-btn:hover) {
+    background: #24c65a;
+  }
+
+  .legal-footnote {
+    margin-top: 3.5rem;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--color-paper-deep);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+
+  .legal-footnote a {
+    color: var(--color-soft-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .legal-credit {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+  }
+</style>

@@ -1,5 +1,6 @@
 import { gsap, ScrollTrigger, prefersReducedMotion } from '@/utils/gsap';
 import { initSmoothScroll, getLenis } from '@/utils/lenis';
+import { allowsPreferences, readConsent, saveConsent } from '@/utils/consent';
 
 const reduced = prefersReducedMotion();
 const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -133,6 +134,12 @@ function initDropdowns() {
    Modo claro / oscuro
    --------------------------------------------------------------------------- */
 
+function writeSharedCookie(name: string, value: string) {
+  if ((name === 'quina-theme' || name === 'quina-lang') && !allowsPreferences()) return;
+  const secure = location.protocol === 'https:' ? '; secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax${secure}`;
+}
+
 function initThemeToggle() {
   const html = document.documentElement;
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -153,11 +160,7 @@ function initThemeToggle() {
     btn.addEventListener('click', () => {
       const next = html.dataset['theme'] === 'dark' ? 'light' : 'dark';
       html.dataset['theme'] = next;
-      try {
-        localStorage.setItem('theme', next);
-      } catch {
-        /* sin almacenamiento: el cambio dura hasta recargar */
-      }
+      writeSharedCookie('quina-theme', next);
       sync();
     }),
   );
@@ -676,13 +679,102 @@ function initFooterReveal() {
    --------------------------------------------------------------------------- */
 
 function initLanguageCookie() {
+  // Si el visitante aterrizó directo en /en/ o /qu/ (por ejemplo desde un enlace
+  // externo), guardamos esa elección sin pisar el idioma del navegador cuando entra a /.
+  const pathLang = /^\/(en|qu)(\/|$)/.exec(location.pathname)?.[1];
+  if (pathLang) writeSharedCookie('quina-lang', pathLang);
+
   document.querySelectorAll<HTMLElement>('[data-set-lang]').forEach((link) =>
     link.addEventListener('click', () => {
       const lang = link.dataset['setLang'];
       if (!lang) return;
-      document.cookie = `quina-lang=${lang}; path=/; max-age=31536000; samesite=lax; secure`;
+      writeSharedCookie('quina-lang', lang);
     }),
   );
+}
+
+/* ---------------------------------------------------------------------------
+   Gestor de preferencias de cookies
+   Solo muestra el banner inicial si el sitio tiene analítica activa y aún no
+   hay consentimiento guardado. El diálogo siempre abre desde [data-cookie-settings].
+   --------------------------------------------------------------------------- */
+
+function initCookieConsent() {
+  const root = document.querySelector<HTMLElement>('[data-cookie-root]');
+  const dialog = root?.querySelector<HTMLDialogElement>('[data-cookie-dialog]');
+  if (!root || !dialog) return;
+
+  const hasAnalytics = root.dataset['hasAnalytics'] === 'true';
+  const banner = root.querySelector<HTMLElement>('[data-cookie-banner]');
+  const prefToggle = dialog.querySelector<HTMLInputElement>('[data-cookie-pref-toggle]');
+  const analyticsToggle = dialog.querySelector<HTMLInputElement>('[data-cookie-analytics-toggle]');
+  const statusEl = dialog.querySelector<HTMLElement>('[data-cookie-status]');
+  const savedNotice = root.dataset['savedNotice'] ?? '';
+
+  let lastTrigger: HTMLElement | null = null;
+
+  const syncInputs = () => {
+    const saved = readConsent();
+    if (prefToggle) prefToggle.checked = saved ? saved.preferences : true;
+    if (analyticsToggle) analyticsToggle.checked = saved ? saved.analytics : false;
+  };
+
+  const hideBanner = () => {
+    if (banner) banner.hidden = true;
+  };
+
+  const openDialog = (trigger?: HTMLElement | null) => {
+    lastTrigger = trigger ?? null;
+    syncInputs();
+    if (!dialog.open) {
+      dialog.showModal();
+      getLenis()?.stop();
+    }
+  };
+
+  const closeDialog = () => {
+    if (dialog.open) dialog.close();
+  };
+
+  const commit = (preferences: boolean, analytics: boolean) => {
+    saveConsent({ preferences, analytics: hasAnalytics && analytics });
+    hideBanner();
+    if (statusEl) statusEl.textContent = savedNotice;
+    closeDialog();
+  };
+
+  dialog.addEventListener('close', () => {
+    getLenis()?.start();
+    lastTrigger?.focus();
+    lastTrigger = null;
+  });
+
+  // Clic en el fondo oscurecido fuera del panel cierra el diálogo
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) closeDialog();
+  });
+
+  dialog.querySelector('[data-cookie-close]')?.addEventListener('click', closeDialog);
+
+  dialog.querySelector('[data-cookie-save]')?.addEventListener('click', () => {
+    commit(prefToggle?.checked ?? true, analyticsToggle?.checked ?? false);
+  });
+
+  root
+    .querySelectorAll('[data-cookie-reject-all]')
+    .forEach((btn) => btn.addEventListener('click', () => commit(false, false)));
+
+  root
+    .querySelectorAll('[data-cookie-accept-all]')
+    .forEach((btn) => btn.addEventListener('click', () => commit(true, true)));
+
+  document
+    .querySelectorAll<HTMLElement>('[data-cookie-settings]')
+    .forEach((btn) => btn.addEventListener('click', () => openDialog(btn)));
+
+  if (hasAnalytics && banner && !readConsent()) {
+    banner.hidden = false;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -695,6 +787,7 @@ initMenu();
 initHeader();
 initDropdowns();
 initLanguageCookie();
+initCookieConsent();
 initFooterReveal();
 initStickyReveal();
 

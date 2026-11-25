@@ -49,6 +49,46 @@ export default defineConfig({
         access: 'public',
         default: 'datos@quina.andeva.tech',
       }),
+      PUBLIC_LEGAL_ENTITY: envField.string({
+        context: 'client',
+        access: 'public',
+        default: 'Andeva S.A.C.',
+      }),
+      PUBLIC_LEGAL_RUC: envField.string({
+        context: 'client',
+        access: 'public',
+        default: '20123456789',
+      }),
+      PUBLIC_LEGAL_ADDRESS: envField.string({
+        context: 'client',
+        access: 'public',
+        default: 'Lima, Perú',
+      }),
+      PUBLIC_ANALYTICS_ID: envField.string({
+        context: 'client',
+        access: 'public',
+        default: '',
+      }),
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({
+        context: 'client',
+        access: 'public',
+        default: '0x4AAAAAAFtSm5qHGdcYIajZ',
+      }),
+      TURNSTILE_SECRET_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
+      RESEND_API_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
+      CLAIMS_FROM_EMAIL: envField.string({
+        context: 'server',
+        access: 'public',
+        default: 'Quina <reclamaciones@quina.andeva.tech>',
+      }),
     },
   },
   vite: {

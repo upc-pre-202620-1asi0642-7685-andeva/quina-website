@@ -2,6 +2,7 @@
 import '@/styles/index.css';
 import Header from '@/components/astro/Header.astro';
 import Footer from '@/components/astro/Footer.astro';
+import CookieConsent from '@/components/astro/CookieConsent.astro';
 import { langHome, ui, type Lang } from '@/i18n/ui';
 
 interface Props {
@@ -69,7 +70,8 @@ const ogLocale = { es: 'es_PE', en: 'en_US', qu: 'qu_PE' }[lang];
         d.classList.add('js');
         let t = null;
         try {
-          t = localStorage.getItem('theme');
+          const match = document.cookie.match(/(?:^|;\s*)quina-theme=(light|dark)(?:;|$)/);
+          t = match ? match[1] : localStorage.getItem('theme');
         } catch {
           // Sin almacenamiento disponible: se usa la preferencia del sistema
         }
@@ -89,6 +91,7 @@ const ogLocale = { es: 'es_PE', en: 'en_US', qu: 'qu_PE' }[lang];
       <slot />
     </main>
     <Footer lang={lang} />
+    <CookieConsent lang={lang} />
     <script>
       import '@/scripts/site';
     </script>
