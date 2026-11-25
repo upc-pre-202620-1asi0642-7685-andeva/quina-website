@@ -1,0 +1,141 @@
+---
+title: Política de cookies
+description: Qué cookies y tecnologías de almacenamiento usa Quina en su sitio público y aplicación, para qué sirven y cómo gestionarlas.
+version: '1.0'
+lastUpdated: 2026-11-24
+lang: es
+---
+
+import { site } from '@/data/site';
+
+> **Transparencia desde el inicio:** hoy el sitio público de Quina **no utiliza cookies de publicidad, rastreo entre sitios ni analítica activa**. Solo empleamos cookies propias mínimas para recordar tu tema visual, tu idioma y, dentro de `/app`, mantener tu sesión segura y proteger los formularios contra bots.
+
+## 1. Qué son las cookies y tecnologías similares
+
+Las **cookies** son pequeños archivos de texto que un sitio web guarda en tu navegador (computadora o celular) para recordar cierta información entre visitas o mientras navegas entre páginas. De manera similar, los navegadores ofrecen el almacenamiento local (`localStorage`), que permite guardar preferencias directamente en tu dispositivo sin enviarlas en cada petición al servidor.
+
+Esta Política de Cookies explica qué cookies y elementos de almacenamiento local utilizamos en **{site.url}** y en la aplicación **{site.url}/app** (operados por **{site.legal.entity}**), por qué los usamos y cómo puedes controlarlos.
+
+## 2. Cómo categorizamos nuestras cookies
+
+Agrupamos las tecnologías que utiliza Quina en tres categorías claras:
+
+1. **Estrictamente necesarias (siempre activas):** imprescindibles para el funcionamiento técnico del sitio, la seguridad perimetral contra bots (Cloudflare Turnstile), el registro de tu decisión sobre cookies y el inicio de sesión seguro dentro de la aplicación web (`/app`). No requieren consentimiento previo, pero te las informamos con total transparencia.
+2. **Preferencias de interfaz:** recuerdan elecciones que tú mismo realizas en el sitio —como el modo claro u oscuro y el idioma elegido— para que la experiencia se mantenga coherente al pasar del sitio público a la aplicación web bajo el mismo dominio. Puedes desactivarlas en cualquier momento desde el panel de configuración de cookies.
+3. **Analíticas (opcionales y desactivadas por defecto):** destinadas a medir de forma agregada qué páginas se visitan y cómo mejorar el rendimiento del sitio. **Actualmente no tenemos ningún servicio de analítica activo.** Si en el futuro incorporamos medición estadística, permanecerá bloqueada por defecto hasta que otorgues tu consentimiento explícito mediante el aviso de cookies.
+
+## 3. Inventario detallado de cookies y almacenamiento
+
+A continuación listamos todos los elementos que Quina puede guardar en tu navegador:
+
+<div
+  class="table-scroll"
+  tabindex="0"
+  role="region"
+  aria-label="Inventario detallado de cookies y almacenamiento local"
+>
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Proveedor / Origen</th>
+        <th>Categoría</th>
+        <th>Finalidad</th>
+        <th>Duración</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>quina-cookie-consent</code>
+        </td>
+        <td>
+          Quina (<code>localStorage</code>)
+        </td>
+        <td>Estrictamente necesaria</td>
+        <td>
+          Guarda tu elección de preferencias de cookies para respetar tu decisión en futuras
+          visitas.
+        </td>
+        <td>Persistente hasta que la borres o cambies tu elección</td>
+      </tr>
+      <tr>
+        <td>
+          <code>quina-theme</code>
+        </td>
+        <td>Quina (cookie propia)</td>
+        <td>Preferencias</td>
+        <td>
+          Recuerda si elegiste modo claro u oscuro al pulsar el botón de tema y lo comparte con{' '}
+          <code>/app</code>.
+        </td>
+        <td>1 año</td>
+      </tr>
+      <tr>
+        <td>
+          <code>quina-lang</code>
+        </td>
+        <td>Quina (cookie propia)</td>
+        <td>Preferencias</td>
+        <td>
+          Recuerda el idioma elegido (castellano, inglés o quechua) para mantenerlo al ingresar a{' '}
+          <code>/app</code>.
+        </td>
+        <td>1 año</td>
+      </tr>
+      <tr>
+        <td>
+          <code>better-auth.session_token</code> (y cookies auxiliares de sesión)
+        </td>
+        <td>
+          Quina / Better Auth (en <code>/app</code>)
+        </td>
+        <td>Estrictamente necesaria</td>
+        <td>
+          Mantiene tu sesión autenticada de forma segura (<code>HttpOnly</code>, <code>Secure</code>
+          , <code>SameSite=Lax</code>) y previene ataques CSRF dentro de la aplicación.
+        </td>
+        <td>Duración de la sesión activa</td>
+      </tr>
+      <tr>
+        <td>
+          <code>cf_clearance</code> / desafío técnico
+        </td>
+        <td>Cloudflare Turnstile (tercero)</td>
+        <td>Estrictamente necesaria</td>
+        <td>
+          Verifica que quien envía un formulario (acceso, registro o Libro de Reclamaciones) es una
+          persona real y no un bot automatizado.
+        </td>
+        <td>Sesión / corta duración definida por Cloudflare</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+Quina **no instala** píxeles publicitarios, redes de _retargeting_ ni cookies de terceros para perfilamiento comercial.
+
+## 4. Cómo configurar o revocar tus preferencias
+
+Puedes revisar o cambiar tus preferencias de cookies en cualquier momento desde el enlace **«Configurar cookies»** disponible en el pie de todas las páginas, o directamente desde el siguiente botón:
+
+<button type="button" class="cookie-trigger-btn" data-cookie-settings>
+  Abrir configuración de cookies
+</button>
+
+Si desactivas las cookies de **Preferencias**, eliminaremos de inmediato las cookies `quina-theme` y `quina-lang` existentes y dejaremos de crearlas; el sitio seguirá funcionando con normalidad utilizando el tema del sistema operativo y el idioma de la ruta que visites.
+
+## 5. Cómo gestionar cookies desde tu navegador
+
+Además de nuestro panel, puedes bloquear o eliminar cookies directamente desde la configuración de tu navegador:
+
+- **Google Chrome:** Configuración → Privacidad y seguridad → Cookies de terceros y datos de sitios.
+- **Safari (macOS e iOS):** Ajustes / Preferencias → Privacidad → Gestionar datos de sitios web.
+- **Mozilla Firefox:** Ajustes → Privacidad y seguridad → Cookies y datos del sitio.
+- **Microsoft Edge:** Configuración → Cookies y permisos del sitio → Administrar y eliminar cookies.
+
+Ten en cuenta que si bloqueas completamente las cookies estrictamente necesarias desde tu navegador, algunas funciones dentro de la aplicación web (`/app`), como mantener tu sesión iniciada o superar la verificación anti-bot, podrían no funcionar correctamente.
+
+## 6. Actualizaciones y contacto
+
+Si incorporamos nuevas cookies o herramientas analíticas, actualizaremos esta tabla y la fecha de versión antes de activarlas. Para cualquier consulta sobre cookies o privacidad, escríbenos a <a href={`mailto:${site.arcoEmail}`}>{site.arcoEmail}</a> o consulta nuestra [Política de privacidad](/legal/privacidad).

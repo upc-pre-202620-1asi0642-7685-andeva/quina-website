@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import LegalLayout from '@/layouts/LegalLayout.astro';
+
+export const getStaticPaths = (async () => {
+  const docs = await getCollection('legal', ({ data }) => data.lang === 'es');
+  return docs.map((doc) => ({ params: { slug: doc.id }, props: { doc } }));
+}) satisfies GetStaticPaths;
+
+const { doc } = Astro.props;
+const { Content, headings } = await render(doc);
+---
+
+<LegalLayout
+  title={doc.data.title}
+  description={doc.data.description}
+  version={doc.data.version}
+  lastUpdated={doc.data.lastUpdated}
+  currentPath={`/legal/${doc.id}`}
+  headings={headings}
+>
+  <Content />
+</LegalLayout>

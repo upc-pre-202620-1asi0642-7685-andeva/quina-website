@@ -1,0 +1,196 @@
+---
+title: Política de privacidad
+description: Cómo Quina protege, trata y conserva los datos personales de comerciantes, vecinos y visitantes conforme a la Ley N.° 29733 del Perú.
+version: '1.0'
+lastUpdated: 2026-11-24
+lang: es
+---
+
+import { site } from '@/data/site';
+
+> **Resumen claro:** Quina es un software de gestión para ordenar el fiado de bodegas y comercios de barrio. **No vendemos ni alquilamos** tus datos personales ni la información de tus vecinos a terceros, y puedes ejercer tus derechos de acceso, rectificación, cancelación y oposición en cualquier momento escribiendo a <a href={`mailto:${site.arcoEmail}`}>{site.arcoEmail}</a>.
+
+## 1. Identificación del titular y marco legal
+
+La presente Política de Privacidad regula el tratamiento de los datos personales recopilados a través del sitio web público **{site.url}** y de la aplicación web **{site.url}/app** (en conjunto, **«Quina»** o la **«Plataforma»**), operados por **{site.legal.entity}** (en adelante, **«Andeva»** o **«nosotros»**), con RUC **{site.legal.ruc}** y domicilio en **{site.legal.address}**.
+
+El tratamiento de datos personales se realiza en cumplimiento de la **Ley N.° 29733**, Ley de Protección de Datos Personales de la República del Perú, y su Reglamento aprobado mediante **Decreto Supremo N.° 003-2013-JUS** y sus normas modificatorias y reglamentarias vigentes (incluido el **Decreto Supremo N.° 016-2024-JUS**).
+
+## 2. Quién es responsable de cada grupo de datos
+
+Debido a la naturaleza de Quina como software para comercios (_Software as a Service_), distinguimos claramente dos roles:
+
+- **Comerciantes, colaboradores y visitantes del sitio web:** respecto a los datos de cuenta, facturación, soporte y navegación que nos proporcionas directamente al visitar **{site.url}** o registrarte como comercio, Andeva actúa como **titular del banco de datos personales**.
+- **Clientes finales (vecinos) registrados por un comercio:** cuando un dueño de bodega o negocio registra en Quina a un cliente vecino para llevar el control de su crédito, **el comercio es el titular y responsable** de los datos personales de dicho cliente frente a la Ley N.° 29733. Andeva actúa únicamente como **encargado de tratamiento** para alojar la información de forma segura, calcular los estados de cuenta conforme a las reglas definidas por el comercio y permitir al vecino consultar gratuitamente su historial y recibir sus avisos.
+
+## 3. Qué datos personales recopilamos
+
+Recopilamos únicamente los datos necesarios para operar Quina de manera segura y confiable:
+
+### 3.1. Datos de comerciantes y miembros de su equipo
+
+- **Identificación y contacto:** nombre y apellidos, correo electrónico, número de teléfono y, cuando el comercio lo registra, nombre comercial o razón social y RUC.
+- **Acceso y seguridad:** contraseña almacenada de forma cifrada mediante _hash_ criptográfico **Argon2id** (nunca en texto plano), códigos de verificación de un solo uso (OTP) o identificador federado cuando eliges ingresar mediante **Google OAuth 2.0**.
+- **Operación comercial:** catálogo de productos, precios, movimientos de inventario (kardex), comprobantes de compra que decidas subir, reglas de crédito configuradas y registros de ventas o cobranzas.
+- **Suscripción y pagos:** estado del plan contratado (Casero, Bodega Pro o Negocio Plus) y comprobantes de suscripción. Los cobros con tarjeta u otros medios son procesados directamente por **Mercado Pago**; Quina **no almacena** números completos de tarjeta ni códigos de seguridad (CVV).
+
+### 3.2. Datos de vecinos (clientes con cuenta de crédito)
+
+- **Identificación y contacto:** nombre, correo electrónico, número de teléfono, dirección referencial y, de manera opcional, número de DNI o documento de identidad cuando el comercio lo requiere.
+- **Historial del fiado:** detalle de cargos, fechas de corte, cuotas, intereses configurados por el comercio y pagos o abonos registrados.
+
+### 3.3. Consultas al asistente de inteligencia artificial
+
+En los planes que incluyen el asistente comercial con inteligencia artificial, enviamos únicamente el contexto resumido y necesario de tu consulta al proveedor de inferencia (**Groq**) para generar la respuesta solicitada. No utilizamos la información privada de tu negocio para entrenar modelos de terceros.
+
+### 3.4. Visitantes del sitio público y Libro de Reclamaciones
+
+- **Preferencias del sitio:** idioma seleccionado (`quina-lang`) y tema visual (`quina-theme`), almacenados mediante cookies propias conforme a nuestra [Política de cookies](/legal/cookies).
+- **Datos técnicos de seguridad:** dirección IP abreviada o registros de seguridad perimetral necesarios para prevenir ataques automatizados y abusos (Cloudflare Turnstile y firewall de red).
+- **Libro de Reclamaciones:** los datos que la normativa de INDECOPI (D.S. N.° 011-2011-PCM) exige consignar en una hoja de reclamación (nombre, documento de identidad, domicilio, correo, teléfono y detalle del reclamo o queja).
+
+## 4. Finalidades del tratamiento
+
+Tratamos los datos personales exclusivamente para las siguientes finalidades:
+
+1. **Prestar y operar Quina:** crear y administrar tu cuenta, aislar los datos de cada comercio, calcular estados de cuenta, liquidaciones e inventario, y habilitar el portal gratuito de consulta para tus vecinos.
+2. **Enviar comunicaciones operativas:** remitir códigos OTP de verificación, enlaces de recuperación de acceso, resúmenes de cargo, recordatorios de fecha de corte y avisos de mora configurados en la Plataforma.
+3. **Gestionar planes y soporte:** procesar suscripciones de planes de pago, atender consultas técnicas y responder reclamos o quejas presentados en el Libro de Reclamaciones.
+4. **Proteger la seguridad de la Plataforma:** autenticar sesiones, detectar accesos sospechosos, aplicar bloqueos temporales ante intentos fallidos y prevenir tráfico automatizado malicioso.
+5. **Cumplir obligaciones legales:** atender requerimientos válidos de autoridades administrativas o judiciales peruanas, obligaciones tributarias y normativa de protección al consumidor.
+6. **Mejora del servicio y analítica opcional:** solo si otorgas tu consentimiento explícito mediante el gestor de cookies cuando se habiliten herramientas de medición en el sitio público.
+
+## 5. Proveedores tecnológicos y flujo transfronterizo de datos
+
+Quina **no vende, alquila ni cede** bases de datos personales a terceros con fines comerciales ni publicitarios. Para operar la infraestructura tecnológica de la Plataforma trabajamos con proveedores especializados que actúan como encargados de tratamiento bajo estándares internacionales de seguridad, lo cual puede implicar flujo transfronterizo de datos:
+
+<div
+  class="table-scroll"
+  tabindex="0"
+  role="region"
+  aria-label="Proveedores tecnológicos y ubicación de infraestructura"
+>
+  <table>
+    <thead>
+      <tr>
+        <th>Proveedor</th>
+        <th>Función en Quina</th>
+        <th>Ubicación de infraestructura</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Vercel Inc.</strong>
+        </td>
+        <td>Alojamiento del sitio web, aplicación web y red perimetral (CDN).</td>
+        <td>Estados Unidos y nodos globales</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Supabase Inc.</strong>
+        </td>
+        <td>
+          Base de datos relacional PostgreSQL con aislamiento por tienda y almacenamiento de
+          comprobantes.
+        </td>
+        <td>Estados Unidos / infraestructura nube AWS</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Cloudflare, Inc.</strong>
+        </td>
+        <td>Gestión DNS y protección anti-bot no intrusiva (Cloudflare Turnstile).</td>
+        <td>Estados Unidos y red perimetral global</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Resend Inc.</strong>
+        </td>
+        <td>
+          Envío de correos transaccionales (OTP, avisos de fiado, recuperación de cuenta y copia de
+          reclamos).
+        </td>
+        <td>Estados Unidos</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Mercado Pago</strong>
+        </td>
+        <td>Procesamiento de pagos de suscripciones SaaS en soles peruanos (planes de pago).</td>
+        <td>Perú / Latinoamérica y Estados Unidos</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Groq, Inc.</strong>
+        </td>
+        <td>
+          Inferencia del asistente comercial con inteligencia artificial (solo cuando el usuario
+          realiza una consulta en planes habilitados).
+        </td>
+        <td>Estados Unidos</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Google LLC</strong>
+        </td>
+        <td>
+          Autenticación federada OAuth 2.0, únicamente si el usuario elige la opción «Continuar con
+          Google».
+        </td>
+        <td>Estados Unidos</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+Todos estos proveedores están sujetos a obligaciones contractuales de confidencialidad y medidas técnicas de protección equivalentes o superiores a las exigidas por la normativa peruana.
+
+## 6. Medidas de seguridad de la información
+
+Implementamos medidas técnicas, organizativas y legales acordes a la naturaleza de los datos tratados, entre ellas:
+
+- Cifrado de las comunicaciones en tránsito mediante **HTTPS/TLS** con política **HSTS** y cabeceras de seguridad perimetral (CSP, `X-Frame-Options`, `X-Content-Type-Options`).
+- Aislamiento lógico multi-tienda a nivel de base de datos mediante **Row Level Security (RLS)** en PostgreSQL, para impedir accesos cruzados entre comercios.
+- Almacenamiento de contraseñas con **Argon2id**, verificación de correo por OTP, enlaces de recuperación con tokens criptográficos de un solo uso y bloqueo temporal de cuenta tras intentos fallidos consecutivos.
+- Sesiones protegidas mediante cookies seguras (`HttpOnly`, `Secure`, `SameSite`) gestionadas por **Better Auth**.
+
+Ningún sistema conectado a internet es invulnerable al 100 %, pero mantenemos monitoreo continuo y te notificaremos oportunamente ante cualquier incidente de seguridad relevante conforme a la normativa peruana.
+
+## 7. Plazo de conservación de los datos
+
+Conservamos los datos personales durante el tiempo estrictamente necesario para cumplir las finalidades descritas:
+
+- **Cuenta activa:** mientras mantengas vigente tu cuenta en Quina o tu relación con el comercio que te registró.
+- **Tras la cancelación o solicitud de baja:** mantenemos los registros operativos por un período de gracia de hasta **30 días calendario** para que el comercio pueda exportar su historial o revertir una baja accidental; transcurrido ese plazo, se eliminan o anonimizan de forma segura, salvo los registros que deban conservarse por mandato legal.
+- **Obligaciones legales y reclamos:** las hojas del Libro de Reclamaciones y la documentación tributaria o contable se conservan durante los plazos mínimos establecidos por la normativa peruana (por ejemplo, 2 años para hojas de reclamaciones conforme a INDECOPI y los plazos de prescripción tributaria o civil aplicables).
+
+## 8. Derechos ARCO y cómo ejercerlos
+
+De acuerdo con la Ley N.° 29733, toda persona titular de datos personales tiene derecho a:
+
+- **Acceso:** conocer qué datos personales tuyos tratamos, su origen y las condiciones de su uso.
+- **Rectificación:** actualizar o corregir datos inexactos, incompletos o desactualizados.
+- **Cancelación (supresión):** solicitar la eliminación de tus datos cuando ya no sean necesarios para la finalidad para la que fueron recopilados o revoques tu consentimiento, sin perjuicio de las obligaciones legales de conservación.
+- **Oposición:** oponerte al tratamiento de tus datos por motivos legítimos y fundados.
+- **Revocación del consentimiento:** retirar tu consentimiento para tratamientos opcionales (como analítica o comunicaciones promocionales) en cualquier momento.
+
+### Procedimiento para presentar una solicitud
+
+Envía un correo a <a href={`mailto:${site.arcoEmail}`}>{site.arcoEmail}</a> con el asunto **«Solicitud de Derechos ARCO»**, indicando:
+
+1. Tu nombre completo y copia simple de tu documento de identidad (DNI, Carné de Extranjería o pasaporte) para verificar tu identidad.
+2. El derecho específico que deseas ejercer y una descripción clara de tu pedido.
+3. Si eres cliente vecino de una bodega específica, el nombre del comercio donde mantienes tu cuenta para canalizar oportunamente la solicitud con el titular correspondiente.
+
+Responderemos dentro de los plazos legales vigentes en el Perú: **8 días hábiles** para solicitudes de información, **20 días hábiles** para solicitudes de acceso y **10 días hábiles** para solicitudes de rectificación, cancelación u oposición. Si consideras que tu solicitud no ha sido atendida debidamente, puedes acudir ante la **Autoridad Nacional de Protección de Datos Personales (ANPD)** del Ministerio de Justicia y Derechos Humanos.
+
+## 9. Menores de edad
+
+Quina está dirigido a comerciantes y personas mayores de **18 años**. No recopilamos deliberadamente datos personales de menores de edad para crear cuentas en la Plataforma. Si detectamos que se registraron datos de un menor sin la autorización de sus padres o tutores legales, procederemos a su eliminación inmediata. En el caso del Libro de Reclamaciones, cuando el reclamante sea menor de edad, el formulario solicita los datos de su padre, madre o apoderado conforme a la normativa de INDECOPI.
+
+## 10. Cambios a esta política y contacto
+
+Podemos actualizar esta Política de Privacidad para reflejar mejoras técnicas, nuevos proveedores o cambios normativos. Publicaremos siempre la versión vigente con su fecha de actualización en esta misma dirección y, cuando el cambio sea sustancial, te avisaremos por correo electrónico o mediante un aviso dentro de Quina.
+
+Para consultas generales sobre privacidad puedes escribirnos a <a href={`mailto:${site.arcoEmail}`}>{site.arcoEmail}</a> o a <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.
