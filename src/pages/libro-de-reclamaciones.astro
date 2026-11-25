@@ -1,0 +1,673 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComplaintsForm from '@/components/react/ComplaintsForm';
+import { site } from '@/data/site';
+
+const legalNav = [
+  { label: 'Política de privacidad', href: '/legal/privacidad' },
+  { label: 'Términos y condiciones', href: '/legal/terminos' },
+  { label: 'Política de cookies', href: '/legal/cookies' },
+  { label: 'Libro de Reclamaciones', href: '/libro-de-reclamaciones' },
+];
+
+const today = new Date().toLocaleDateString('es-PE', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout
+  title="Libro de Reclamaciones · Quina"
+  description="Libro de Reclamaciones Virtual de Quina conforme al D.S. N.° 011-2011-PCM e INDECOPI. Respuesta en un plazo máximo de 15 días hábiles improrrogables."
+>
+  <section class="claims-hero">
+    <div class="claims-hero-card">
+      <div class="claims-hero-inner" data-reveal-group>
+        <p class="claims-crumb" data-reveal>
+          Legal · INDECOPI
+        </p>
+        <h1 class="claims-title" data-split>
+          Libro de Reclamaciones Virtual
+        </h1>
+        <p class="claims-lead" data-reveal>
+          Conforme al Código de Protección y Defensa del Consumidor (Ley N.° 29571) y el Reglamento
+          del Libro de Reclamaciones (D.S. N.° 011-2011-PCM), puedes registrar aquí cualquier
+          reclamo o queja sobre nuestro servicio.
+        </p>
+        <dl class="claims-meta" data-reveal>
+          <div>
+            <dt>Fecha</dt>
+            <dd>{today}</dd>
+          </div>
+          <div>
+            <dt>Plazo de respuesta</dt>
+            <dd>Máximo 15 días hábiles improrrogables</dd>
+          </div>
+          <div>
+            <dt>Proveedor</dt>
+            <dd>{site.legal.entity}</dd>
+          </div>
+          <div>
+            <dt>RUC</dt>
+            <dd>{site.legal.ruc}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <nav class="legal-tabs-wrap" aria-label="Documentos legales">
+    <div class="wrap">
+      <ul class="legal-tabs">
+        {legalNav.map((item) => {
+          const active = item.href === '/libro-de-reclamaciones';
+          return (
+            <li>
+              <a
+                href={item.href}
+                class:list={['legal-tab', { 'is-active': active }]}
+                aria-current={active ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </nav>
+
+  <section class="wrap claims-body" aria-label="Hoja de reclamación">
+    <aside class="claims-aside">
+      <div class="info-card">
+        <p class="aside-title">Identificación del proveedor</p>
+        <dl class="info-list">
+          <div>
+            <dt>Nombre comercial</dt>
+            <dd>Quina</dd>
+          </div>
+          <div>
+            <dt>Razón social</dt>
+            <dd>{site.legal.entity}</dd>
+          </div>
+          <div>
+            <dt>RUC</dt>
+            <dd>{site.legal.ruc}</dd>
+          </div>
+          <div>
+            <dt>Domicilio fiscal</dt>
+            <dd>{site.legal.address}</dd>
+          </div>
+          <div>
+            <dt>Correo de atención</dt>
+            <dd>
+              <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="info-card">
+        <p class="aside-title">Antes de registrar</p>
+        <p class="info-note">
+          Si tu consulta está relacionada con un fiado o compra realizada dentro de una bodega
+          específica, recuerda que Quina es únicamente el software de gestión: el acuerdo comercial
+          pertenece directamente al comercio donde compraste.
+        </p>
+      </div>
+    </aside>
+
+    <div class="claims-main">
+      <ComplaintsForm
+        client:load
+        providerEntity={site.legal.entity}
+        providerRuc={site.legal.ruc}
+        providerAddress={site.legal.address}
+        contactEmail={site.contactEmail}
+        turnstileSiteKey={site.turnstileSiteKey}
+      />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .wrap {
+    width: min(100% - 2.5rem, 84rem);
+    margin-inline: auto;
+  }
+
+  .claims-hero {
+    padding: 0 0.75rem;
+  }
+
+  .claims-hero-card {
+    padding: clamp(3rem, 2rem + 4vw, 5.5rem) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+    border-radius: 28px;
+    background: var(--color-soft);
+    color: var(--color-soft-ink);
+  }
+
+  .claims-hero-inner {
+    width: min(100%, 56rem);
+    margin-inline: auto;
+  }
+
+  .claims-crumb {
+    margin-bottom: 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-soft-ink);
+  }
+
+  .claims-title {
+    font-size: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .claims-lead {
+    margin-top: 1.25rem;
+    max-width: 44rem;
+    font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.25rem);
+    line-height: 1.55;
+    color: var(--color-soft-ink-2);
+  }
+
+  .claims-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2.5rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-soft-ink) 14%, transparent);
+  }
+
+  .claims-meta dt {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-soft-ink-2);
+  }
+
+  .claims-meta dd {
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-soft-ink);
+  }
+
+  .legal-tabs-wrap {
+    margin-top: 1.5rem;
+  }
+
+  .legal-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .legal-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 1.125rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-ink-soft);
+    transition:
+      background-color 200ms var(--ease-out-expo),
+      color 200ms var(--ease-out-expo),
+      border-color 200ms var(--ease-out-expo);
+  }
+
+  .legal-tab:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-ink);
+  }
+
+  .legal-tab.is-active {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  :global([data-theme='dark']) .legal-tab.is-active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  .claims-body {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: clamp(3rem, 2rem + 3vw, 5rem) clamp(5rem, 4rem + 4vw, 8rem);
+  }
+
+  @media (min-width: 1024px) {
+    .claims-body {
+      grid-template-columns: 19rem minmax(0, 1fr);
+      gap: 3.5rem;
+      align-items: start;
+    }
+
+    .claims-aside {
+      position: sticky;
+      top: 6.5rem;
+    }
+  }
+
+  .claims-aside {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .info-card {
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+  }
+
+  .aside-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink-soft);
+  }
+
+  .info-list {
+    display: grid;
+    gap: 0.875rem;
+    margin-top: 1rem;
+  }
+
+  .info-list dt {
+    font-size: 0.8125rem;
+    color: var(--color-ink-soft);
+  }
+
+  .info-list dd {
+    margin-top: 0.125rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .info-list a {
+    color: var(--color-link-active);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .info-note {
+    margin-top: 0.875rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+  }
+
+  .claims-main {
+    min-width: 0;
+  }
+
+  /* Estilos de la isla React ComplaintsForm */
+  :global(.claim-form) {
+    display: grid;
+    gap: 2rem;
+  }
+
+  :global(.claim-section) {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+    border-radius: 24px;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+  }
+
+  :global(.claim-legend) {
+    float: left;
+    width: 100%;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    padding: 0;
+    margin-bottom: 0.25rem;
+  }
+
+  :global(.claim-legend + *) {
+    clear: both;
+  }
+
+  :global(.claim-grid) {
+    display: grid;
+    gap: 1rem 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(.claim-grid) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    :global(.claim-span-2) {
+      grid-column: span 2;
+    }
+  }
+
+  :global(.claim-field) {
+    display: grid;
+    gap: 0.4rem;
+    align-content: start;
+  }
+
+  :global(.claim-field label) {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  :global(.claim-field input),
+  :global(.claim-field select),
+  :global(.claim-field textarea) {
+    width: 100%;
+    padding: 0.75rem 0.95rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 1rem;
+    line-height: 1.45;
+    transition: border-color 180ms var(--ease-out-expo);
+  }
+
+  :global(.claim-field input:focus),
+  :global(.claim-field select:focus),
+  :global(.claim-field textarea:focus) {
+    border-color: var(--color-link-active);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  }
+
+  :global(.claim-field [aria-invalid='true']) {
+    border-color: var(--color-error);
+  }
+
+  :global(.claim-err) {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #c21d26;
+  }
+
+  :global([data-theme='dark'] .claim-err) {
+    color: #ff7b82;
+  }
+
+  :global(.claim-alert) {
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    border: 1px solid #c21d26;
+    background: color-mix(in srgb, var(--color-error) 10%, var(--color-surface));
+    color: var(--color-ink);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  :global(.claim-check) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  :global(.claim-check input) {
+    margin-top: 0.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: var(--color-primary-dark);
+    flex: none;
+  }
+
+  :global([data-theme='dark'] .claim-check input) {
+    accent-color: var(--color-primary);
+  }
+
+  :global(.claim-check a) {
+    color: var(--color-soft-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  :global(.claim-minor-box) {
+    padding: 1.25rem;
+    border-radius: 16px;
+    background: var(--color-paper-deep);
+  }
+
+  :global(.claim-radios) {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(.claim-radios) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  :global(.claim-radio-card) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.25rem 0.75rem;
+    padding: 1rem 1.125rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    cursor: pointer;
+    transition:
+      border-color 200ms var(--ease-out-expo),
+      background-color 200ms var(--ease-out-expo);
+  }
+
+  :global(.claim-radio-card.is-selected) {
+    border-color: var(--color-link-active);
+    background: var(--color-soft);
+    color: var(--color-soft-ink);
+  }
+
+  :global(.claim-radio-card input) {
+    grid-row: span 2;
+    margin-top: 0.2rem;
+    accent-color: var(--color-primary-dark);
+  }
+
+  :global(.claim-radio-card strong) {
+    font-weight: 700;
+  }
+
+  :global(.claim-radio-card small) {
+    grid-column: 2;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-ink-soft);
+  }
+
+  :global(.claim-radio-card.is-selected small) {
+    color: var(--color-soft-ink-2);
+  }
+
+  :global(.claim-legal-box) {
+    display: grid;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 20px;
+    background: var(--color-paper-deep);
+  }
+
+  :global(.claim-indecopi-note) {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+  }
+
+  :global(.claim-submit-row) {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  :global(.claim-btn) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 3.25rem;
+    padding-inline: 1.625rem;
+    border-radius: 9999px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 200ms var(--ease-out-expo),
+      color 200ms var(--ease-out-expo);
+  }
+
+  :global(.claim-btn:disabled) {
+    opacity: 0.65;
+    cursor: wait;
+  }
+
+  :global(.claim-btn-primary) {
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  :global(.claim-btn-primary:hover:not(:disabled)) {
+    background: #24c65a;
+  }
+
+  :global(.claim-btn-secondary) {
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  :global(.claim-btn-secondary:hover) {
+    background: #12462a;
+  }
+
+  :global(.claim-btn-ghost) {
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  :global(.claim-btn-ghost:hover) {
+    background: var(--color-surface-hover);
+  }
+
+  :global(.claim-receipt) {
+    display: grid;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    border-radius: 24px;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+  }
+
+  :global(.claim-receipt-badge) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    background: var(--color-soft);
+    color: var(--color-soft-ink);
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  :global(.claim-code) {
+    margin-top: 1rem;
+    font-size: clamp(1.75rem, 1.3rem + 1.5vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--color-ink);
+  }
+
+  :global(.claim-receipt-sub) {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+  }
+
+  :global(.claim-notice) {
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    background: var(--color-paper-deep);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--color-ink);
+  }
+
+  :global(.claim-notice-ok) {
+    background: var(--color-soft);
+    color: var(--color-soft-ink);
+  }
+
+  :global(.claim-summary) {
+    display: grid;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  :global(.claim-summary dt) {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-soft);
+  }
+
+  :global(.claim-summary dd) {
+    margin-top: 0.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    color: var(--color-ink);
+  }
+
+  :global(.claim-receipt-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+  }
+
+  @media print {
+    :global(header),
+    :global(footer),
+    .legal-tabs-wrap,
+    .claims-aside,
+    :global(.claim-receipt-actions) {
+      display: none !important;
+    }
+
+    .claims-body {
+      display: block;
+      padding-block: 1rem;
+    }
+  }
+</style>
