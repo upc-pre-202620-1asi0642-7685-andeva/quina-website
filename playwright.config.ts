@@ -5,6 +5,7 @@ const PORT = 4321;
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  workers: process.env['CI'] ? 2 : 4,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
   reporter: 'html',
@@ -19,7 +20,9 @@ export default defineConfig({
     { name: 'mobile-chrome', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: `pnpm astro build && pnpm astro preview --port ${PORT}`,
+    // @astrojs/vercel no implementa `astro preview` cuando existen rutas serverless (/api/*);
+    // compilamos para validar producción y levantamos Astro en el puerto de pruebas para cubrir páginas y API.
+    command: `pnpm astro build && pnpm astro dev --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env['CI'],
     timeout: 180_000,
